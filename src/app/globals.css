@@ -1,26 +1,452 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --canvas: #070412;
+  --surface: #151121;
+  --surface-dim: #151121;
+  --surface-bright: #3c3648;
+  --surface-container-lowest: #100c1b;
+  --surface-container-low: #1e1929;
+  --surface-container: #221d2e;
+  --surface-container-high: #2c2738;
+  --surface-container-highest: #373244;
+  --surface-variant: #373244;
+  --surface-tint: #d2bbff;
+
+  --primary: #d2bbff;
+  --primary-container: #7c3aed;
+  --primary-fixed: #eaddff;
+  --primary-fixed-dim: #d2bbff;
+  --on-primary: #3f008e;
+  --on-primary-container: #ede0ff;
+  --on-primary-fixed: #25005a;
+  --on-primary-fixed-variant: #5a00c6;
+
+  --secondary: #d3bbff;
+  --secondary-container: #592da2;
+  --secondary-fixed: #ebdcff;
+  --secondary-fixed-dim: #d3bbff;
+  --on-secondary: #3f0689;
+  --on-secondary-container: #c8aaff;
+  --on-secondary-fixed: #260059;
+  --on-secondary-fixed-variant: #572ba0;
+
+  --tertiary: #7bd0ff;
+  --tertiary-container: #006e95;
+  --tertiary-fixed: #c4e7ff;
+  --tertiary-fixed-dim: #7bd0ff;
+  --on-tertiary: #00354a;
+  --on-tertiary-container: #caeaff;
+  --on-tertiary-fixed: #001e2c;
+  --on-tertiary-fixed-variant: #004c69;
+
+  --on-surface: #e8dff6;
+  --on-surface-variant: #ccc3d8;
+  --on-background: #e8dff6;
+  --inverse-surface: #e8dff6;
+  --inverse-on-surface: #332e3f;
+  --inverse-primary: #732ee4;
+
+  --outline: #958da1;
+  --outline-variant: #4a4455;
+
+  --error: #ffb4ab;
+  --error-container: #93000a;
+  --on-error: #690005;
+  --on-error-container: #ffdad6;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-headline: var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-surface-variant: var(--surface-variant);
+  --color-surface-tint: var(--surface-tint);
+
+  --color-primary: var(--primary);
+  --color-primary-container: var(--primary-container);
+  --color-primary-fixed: var(--primary-fixed);
+  --color-primary-fixed-dim: var(--primary-fixed-dim);
+  --color-on-primary: var(--on-primary);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-on-primary-fixed: var(--on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--on-primary-fixed-variant);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-secondary-fixed: var(--secondary-fixed);
+  --color-secondary-fixed-dim: var(--secondary-fixed-dim);
+  --color-on-secondary: var(--on-secondary);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-on-secondary-fixed: var(--on-secondary-fixed);
+  --color-on-secondary-fixed-variant: var(--on-secondary-fixed-variant);
+
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-tertiary-fixed: var(--tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--tertiary-fixed-dim);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-on-tertiary-fixed: var(--on-tertiary-fixed);
+  --color-on-tertiary-fixed-variant: var(--on-tertiary-fixed-variant);
+
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-on-background: var(--on-background);
+  --color-inverse-surface: var(--inverse-surface);
+  --color-inverse-on-surface: var(--inverse-on-surface);
+  --color-inverse-primary: var(--inverse-primary);
+
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+
+  --color-error: var(--error);
+  --color-error-container: var(--error-container);
+  --color-on-error: var(--on-error);
+  --color-on-error-container: var(--on-error-container);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Cosmic Background Mesh Grid */
+.bg-grid-mesh {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Specular Border Gradient */
+.specular-border {
+  background: radial-gradient(circle at 50% 0%, rgba(210, 187, 255, 0.35) 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
+}
+
+/* Glassmorphic Panel Styles */
+.glass-panel {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.03) 100%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(124, 58, 237, 0.25);
+}
+
+.glass-panel-elevated {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 16px 48px 0 rgba(124, 58, 237, 0.35), inset 0 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Atmospheric Ambient Pulse */
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.05);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-pulse-slow {
+  animation: pulseSlow 8s ease-in-out infinite;
+}
+
+/* Aurora Background Keyframes & Fluid Flow System */
+@keyframes aurora-1 {
+  0% {
+    transform: translate(-8%, -10%) rotate(0deg) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate(12%, 8%) rotate(22deg) scale(1.18);
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate(-8%, -10%) rotate(0deg) scale(1);
+    opacity: 0.35;
+  }
+}
+
+@keyframes aurora-2 {
+  0% {
+    transform: translate(10%, -6%) rotate(0deg) scale(1.12);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate(-14%, 12%) rotate(-18deg) scale(0.96);
+    opacity: 0.52;
+  }
+  100% {
+    transform: translate(10%, -6%) rotate(0deg) scale(1.12);
+    opacity: 0.3;
+  }
+}
+
+@keyframes aurora-3 {
+  0% {
+    transform: translate(0%, 12%) rotate(0deg) scale(1);
+    opacity: 0.28;
+  }
+  50% {
+    transform: translate(-12%, -12%) rotate(16deg) scale(1.22);
+    opacity: 0.48;
+  }
+  100% {
+    transform: translate(0%, 12%) rotate(0deg) scale(1);
+    opacity: 0.28;
+  }
+}
+
+@keyframes aurora-4 {
+  0% {
+    transform: translate(-6%, 6%) rotate(0deg) scale(0.92);
+    opacity: 0.22;
+  }
+  50% {
+    transform: translate(8%, -8%) rotate(-14deg) scale(1.14);
+    opacity: 0.42;
+  }
+  100% {
+    transform: translate(-6%, 6%) rotate(0deg) scale(0.92);
+    opacity: 0.22;
+  }
+}
+
+@keyframes aurora-shimmer {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scaleY(1.12);
+  }
+}
+
+.animate-aurora-1 {
+  animation: aurora-1 22s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-aurora-2 {
+  animation: aurora-2 26s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-aurora-3 {
+  animation: aurora-3 30s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-aurora-4 {
+  animation: aurora-4 24s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-aurora-shimmer {
+  animation: aurora-shimmer 14s ease-in-out infinite;
+}
+
+/* Interactive Card Aurora Backlight Bloom (Option 5) */
+.glass-card-interactive {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.03) 100%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(124, 58, 237, 0.22);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.glass-card-interactive::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    500px circle at var(--mouse-card-x, 50%) var(--mouse-card-y, 50%),
+    rgba(124, 58, 237, 0.18),
+    rgba(56, 189, 248, 0.08) 35%,
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-card-interactive::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    400px circle at var(--mouse-card-x, 50%) var(--mouse-card-y, 50%),
+    rgba(210, 187, 255, 0.4),
+    rgba(56, 189, 248, 0.2) 40%,
+    transparent 70%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.glass-card-interactive:hover {
+  border-color: rgba(210, 187, 255, 0.35);
+  box-shadow: 0 16px 48px -8px rgba(124, 58, 237, 0.4), 0 0 24px rgba(56, 189, 248, 0.2);
+  transform: translateY(-2px);
+}
+
+.glass-card-interactive:hover::before,
+.glass-card-interactive:hover::after {
+  opacity: 1;
+}
+
+/* Accessibility: respect user prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-aurora-1,
+  .animate-aurora-2,
+  .animate-aurora-3,
+  .animate-aurora-4,
+  .animate-aurora-shimmer,
+  .animate-pulse-slow {
+    animation: none !important;
+  }
+  .glass-card-interactive:hover {
+    transform: none !important;
+  }
+}
+
+/* Custom Cosmic Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(16, 12, 27, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.6);
+}
+
+/* Material Symbols Outlined Default Styling */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.material-symbols-outlined.fill-icon {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+
+/* Typography Scale Utilities matching Stitch Cosmic Glass Specs */
+.font-headline {
+  font-family: var(--font-headline);
+}
+.font-body {
+  font-family: var(--font-body);
+}
+
+.text-headline-xl {
+  font-family: var(--font-headline);
+  font-size: 56px;
+  line-height: 64px;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+.text-headline-lg {
+  font-family: var(--font-headline);
+  font-size: 40px;
+  line-height: 48px;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+}
+.text-headline-md {
+  font-family: var(--font-headline);
+  font-size: 28px;
+  line-height: 36px;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+.text-headline-sm {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+.text-body-lg {
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+}
+.text-body-md {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 24px;
+  letter-spacing: 0em;
+  font-weight: 400;
+}
+.text-body-sm {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 20px;
+  letter-spacing: 0.01em;
+  font-weight: 400;
+}
+.text-label-lg {
+  font-family: var(--font-headline);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+.text-label-md {
+  font-family: var(--font-headline);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.text-label-sm {
+  font-family: var(--font-headline);
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
 }
