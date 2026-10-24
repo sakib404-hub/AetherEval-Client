@@ -22,6 +22,10 @@ const STUDENT_DASHBOARD_NAV_ITEMS: NavItem[] = [
   { id: "submit", label: "Submit", href: "/student-dashboard/submit", icon: "cloud_upload" },
 ];
 
+const MENTOR_DASHBOARD_NAV_ITEMS: NavItem[] = [
+  { id: "reviews", label: "Reviews", href: "/mentor-dashboard", icon: "fact_check" },
+];
+
 interface FloatingDockProps {
   items?: NavItem[];
 }
@@ -29,11 +33,23 @@ interface FloatingDockProps {
 export function FloatingDock({ items }: FloatingDockProps) {
   const pathname = usePathname();
 
-  // Determine if viewing student dashboard routes
+  // Determine dashboard route contexts
   const isStudentDashboard = pathname.startsWith("/student-dashboard");
+  const isMentorDashboard = pathname.startsWith("/mentor-dashboard");
+  const isDashboard = isStudentDashboard || isMentorDashboard;
 
   // Select active nav list
-  const activeNavItems = items || (isStudentDashboard ? STUDENT_DASHBOARD_NAV_ITEMS : PUBLIC_NAV_ITEMS);
+  let activeNavItems = items;
+  if (!activeNavItems) {
+    if (isStudentDashboard) {
+      activeNavItems = STUDENT_DASHBOARD_NAV_ITEMS;
+    } else if (isMentorDashboard) {
+      activeNavItems = MENTOR_DASHBOARD_NAV_ITEMS;
+    } else {
+      activeNavItems = PUBLIC_NAV_ITEMS;
+    }
+  }
+
   const itemCount = activeNavItems.length;
 
   // Rule: for 2 or 3 items -> smaller compact height; for 4 or 5 items -> larger height
@@ -45,6 +61,9 @@ export function FloatingDock({ items }: FloatingDockProps) {
     }
     if (href === "/student-dashboard") {
       return pathname === "/student-dashboard";
+    }
+    if (href === "/mentor-dashboard") {
+      return pathname === "/mentor-dashboard";
     }
     if (href === "/login") {
       return pathname.startsWith("/login") || pathname.startsWith("/register");
@@ -136,8 +155,8 @@ export function FloatingDock({ items }: FloatingDockProps) {
           })}
         </nav>
 
-        {/* Bottom Utility: Logout Button for Student Dashboard */}
-        {isStudentDashboard && (
+        {/* Bottom Utility: Logout Button for Dashboard sessions (Student & Mentor) */}
+        {isDashboard && (
           <div className="pt-3 border-t border-white/10 w-full flex justify-center mt-1">
             <Link
               href="/login"
@@ -199,7 +218,7 @@ export function FloatingDock({ items }: FloatingDockProps) {
           );
         })}
 
-        {isStudentDashboard && (
+        {isDashboard && (
           <Link
             href="/login"
             title="Logout"
