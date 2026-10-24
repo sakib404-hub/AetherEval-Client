@@ -26,6 +26,10 @@ const MENTOR_DASHBOARD_NAV_ITEMS: NavItem[] = [
   { id: "reviews", label: "Reviews", href: "/mentor-dashboard", icon: "fact_check" },
 ];
 
+const ADMIN_DASHBOARD_NAV_ITEMS: NavItem[] = [
+  { id: "mentors", label: "Mentors", href: "/admin-dashboard", icon: "how_to_reg" },
+];
+
 interface FloatingDockProps {
   items?: NavItem[];
 }
@@ -36,7 +40,8 @@ export function FloatingDock({ items }: FloatingDockProps) {
   // Determine dashboard route contexts
   const isStudentDashboard = pathname.startsWith("/student-dashboard");
   const isMentorDashboard = pathname.startsWith("/mentor-dashboard");
-  const isDashboard = isStudentDashboard || isMentorDashboard;
+  const isAdminDashboard = pathname.startsWith("/admin-dashboard");
+  const isDashboard = isStudentDashboard || isMentorDashboard || isAdminDashboard;
 
   // Select active nav list
   let activeNavItems = items;
@@ -45,6 +50,8 @@ export function FloatingDock({ items }: FloatingDockProps) {
       activeNavItems = STUDENT_DASHBOARD_NAV_ITEMS;
     } else if (isMentorDashboard) {
       activeNavItems = MENTOR_DASHBOARD_NAV_ITEMS;
+    } else if (isAdminDashboard) {
+      activeNavItems = ADMIN_DASHBOARD_NAV_ITEMS;
     } else {
       activeNavItems = PUBLIC_NAV_ITEMS;
     }
@@ -64,6 +71,9 @@ export function FloatingDock({ items }: FloatingDockProps) {
     }
     if (href === "/mentor-dashboard") {
       return pathname === "/mentor-dashboard";
+    }
+    if (href === "/admin-dashboard") {
+      return pathname === "/admin-dashboard";
     }
     if (href === "/login") {
       return pathname.startsWith("/login") || pathname.startsWith("/register");

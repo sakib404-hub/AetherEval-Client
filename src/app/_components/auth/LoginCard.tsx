@@ -89,20 +89,27 @@ export function LoginCard() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-2.5 pt-2">
               <Link
                 href="/student-dashboard"
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium py-3 px-5 rounded-xl shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:shadow-[0_0_30px_rgba(124,58,237,0.6)] transition-all inline-flex items-center gap-2 cursor-pointer text-xs font-headline w-full sm:w-auto justify-center"
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium py-2.5 px-4 rounded-xl shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:shadow-[0_0_30px_rgba(124,58,237,0.6)] transition-all inline-flex items-center gap-1.5 cursor-pointer text-xs font-headline justify-center"
               >
-                <span>Enter Student Dashboard</span>
-                <span className="material-symbols-outlined text-base">school</span>
+                <span>Student Portal</span>
+                <span className="material-symbols-outlined text-sm">school</span>
               </Link>
               <Link
                 href="/mentor-dashboard"
-                className="bg-white/10 hover:bg-white/15 text-white font-medium py-3 px-5 rounded-xl border border-white/15 hover:border-primary/50 transition-all inline-flex items-center gap-2 cursor-pointer text-xs font-headline w-full sm:w-auto justify-center shadow-lg"
+                className="bg-white/10 hover:bg-white/15 text-white font-medium py-2.5 px-4 rounded-xl border border-white/15 hover:border-primary/50 transition-all inline-flex items-center gap-1.5 cursor-pointer text-xs font-headline justify-center shadow-lg"
               >
-                <span>Enter Mentor Dashboard</span>
-                <span className="material-symbols-outlined text-base text-primary">fact_check</span>
+                <span>Mentor Reviews</span>
+                <span className="material-symbols-outlined text-sm text-primary">fact_check</span>
+              </Link>
+              <Link
+                href="/admin-dashboard"
+                className="bg-purple-900/30 hover:bg-purple-900/50 text-purple-200 font-medium py-2.5 px-4 rounded-xl border border-purple-500/30 hover:border-purple-400 transition-all inline-flex items-center gap-1.5 cursor-pointer text-xs font-headline justify-center shadow-lg"
+              >
+                <span>Admin Oracle</span>
+                <span className="material-symbols-outlined text-sm text-amber-400">admin_panel_settings</span>
               </Link>
             </div>
           </div>
