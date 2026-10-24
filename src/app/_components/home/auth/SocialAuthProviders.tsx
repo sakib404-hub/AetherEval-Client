@@ -1,11 +1,11 @@
 "use client";
 
-import { GlassButton } from "../../ui/GlassButton";
+import { showInfoAlert } from "@/lib/alert";
 
 export function SocialAuthProviders() {
   const handleSSO = (provider: string) => {
     // Frontend-first mock feedback
-    alert(`Connecting to ${provider} Institutional Single Sign-On...`);
+    showInfoAlert("Institutional SSO Handshake", `Connecting to ${provider} Institutional Single Sign-On...`);
   };
 
   return (

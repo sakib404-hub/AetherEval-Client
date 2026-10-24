@@ -1,5 +1,8 @@
 "use client";
 
+import { logout } from "@/app/_actions/auth/logout";
+import { showSuccessAlert } from "@/lib/alert";
+
 interface AdminContextBarProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
@@ -9,6 +12,12 @@ export function AdminContextBar({
   searchQuery,
   onSearchChange,
 }: AdminContextBarProps) {
+  const handleLogout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    showSuccessAlert("Logged Out", "Session terminated successfully.");
+    await logout();
+  };
+
   return (
     <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-8 border-b border-white/10">
       <div>
@@ -55,6 +64,20 @@ export function AdminContextBar({
             </span>
           </span>
         </div>
+
+        {/* Logout Action */}
+        <form onSubmit={handleLogout}>
+          <button
+            type="submit"
+            title="Disconnect Admin Session"
+            className="px-3.5 py-2 rounded-2xl bg-white/[0.04] hover:bg-rose-500/20 text-on-surface-variant hover:text-rose-300 border border-white/10 hover:border-rose-500/30 backdrop-blur-md flex items-center gap-1.5 text-xs font-headline font-semibold transition-all cursor-pointer shadow-sm"
+          >
+            <span className="material-symbols-outlined text-[16px] text-rose-400">
+              logout
+            </span>
+            <span>Logout</span>
+          </button>
+        </form>
       </div>
     </header>
   );

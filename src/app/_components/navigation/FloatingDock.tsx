@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { logout } from "@/app/_actions/auth/logout";
+import { showSuccessAlert } from "@/lib/alert";
 
 export interface NavItem {
   id: string;
@@ -79,6 +81,12 @@ export function FloatingDock({ items }: FloatingDockProps) {
       return pathname.startsWith("/login") || pathname.startsWith("/register");
     }
     return pathname.startsWith(href);
+  };
+
+  const handleLogout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    showSuccessAlert("Logged Out", "Session terminated successfully.");
+    await logout();
   };
 
   return (
@@ -165,18 +173,23 @@ export function FloatingDock({ items }: FloatingDockProps) {
           })}
         </nav>
 
-        {/* Bottom Utility: Logout Button for Dashboard sessions (Student & Mentor) */}
+        {/* Bottom Utility: Logout Button for Dashboard sessions (Student, Mentor & Admin) */}
         {isDashboard && (
-          <div className="pt-3 border-t border-white/10 w-full flex justify-center mt-1">
-            <Link
-              href="/login"
-              title="Disconnect Evaluation Session (Logout)"
-              className="w-10 h-10 rounded-2xl bg-white/[0.04] hover:bg-rose-500/20 text-on-surface-variant hover:text-rose-400 border border-white/10 hover:border-rose-500/30 flex items-center justify-center transition-all cursor-pointer group"
-            >
-              <span className="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">
-                logout
-              </span>
-            </Link>
+          <div className="pt-2 border-t border-white/10 w-full px-2.5 mt-1">
+            <form onSubmit={handleLogout} className="w-full">
+              <button
+                type="submit"
+                title="Disconnect Evaluation Session (Logout)"
+                className="relative rounded-2xl p-2.5 w-full flex flex-col items-center gap-1.5 transition-all duration-200 group cursor-pointer hover:bg-rose-500/15 text-rose-400/80 hover:text-rose-300 border border-transparent hover:border-rose-500/30 shadow-sm"
+              >
+                <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
+                  logout
+                </span>
+                <span className="font-headline text-[9.5px] text-center tracking-tight leading-tight font-semibold">
+                  Logout
+                </span>
+              </button>
+            </form>
           </div>
         )}
       </aside>
@@ -229,13 +242,16 @@ export function FloatingDock({ items }: FloatingDockProps) {
         })}
 
         {isDashboard && (
-          <Link
-            href="/login"
-            title="Logout"
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-headline text-rose-400 hover:bg-rose-500/10 transition-colors"
-          >
-            <span className="material-symbols-outlined text-lg">logout</span>
-          </Link>
+          <form onSubmit={handleLogout}>
+            <button
+              type="submit"
+              title="Logout"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-headline text-rose-400 hover:text-rose-300 hover:bg-rose-500/15 border border-transparent hover:border-rose-500/30 transition-all cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-lg">logout</span>
+              <span className="font-semibold">Logout</span>
+            </button>
+          </form>
         )}
       </nav>
     </>

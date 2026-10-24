@@ -46,6 +46,7 @@ export function MentorFields({
           </span>
           <input
             type="text"
+            name="expertise"
             required
             value={expertise}
             onChange={(e) => setExpertise(e.target.value)}
@@ -66,6 +67,7 @@ export function MentorFields({
           </span>
           <input
             type="url"
+            name="portfolioUrl"
             required
             value={portfolio}
             onChange={(e) => setPortfolio(e.target.value)}
@@ -81,7 +83,9 @@ export function MentorFields({
           Short Bio / Mentorship Background
         </label>
         <textarea
+          name="bio"
           rows={3}
+          required
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           placeholder="Briefly describe your research interests, industry experience, and prior mentorship involvement..."

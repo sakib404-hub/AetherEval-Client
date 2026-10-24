@@ -5,6 +5,7 @@ import { RoleToggle, RoleType } from "./RoleToggle";
 import { PasswordEntropyBar } from "./PasswordEntropyBar";
 import { MentorFields } from "./MentorFields";
 import { StatusTiersLegend } from "./StatusTiersLegend";
+import { showErrorAlert, showWarningAlert } from "@/lib/alert";
 
 interface RegistrationFormProps {
   onSwitchToLogin: () => void;
@@ -38,11 +39,11 @@ export function RegistrationForm({ onSwitchToLogin }: RegistrationFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreeTerms) {
-      alert("Please accept the Academic Evaluation Guidelines & Privacy Protocol.");
+      showWarningAlert("Action Required", "Please accept the Academic Evaluation Guidelines & Privacy Protocol.");
       return;
     }
     if (password !== confirmPassword) {
-      alert("Passwords do not match. Please verify your passkeys.");
+      showErrorAlert("Validation Error", "Passwords do not match. Please verify your passkeys.");
       return;
     }
 

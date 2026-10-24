@@ -3,9 +3,16 @@ import Link from "next/link";
 interface HistoryHeaderProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
-export function HistoryHeader({ searchQuery, onSearchChange }: HistoryHeaderProps) {
+export function HistoryHeader({
+  searchQuery,
+  onSearchChange,
+  onRefresh,
+  isRefreshing = false,
+}: HistoryHeaderProps) {
   return (
     <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
       <div>
@@ -14,7 +21,7 @@ export function HistoryHeader({ searchQuery, onSearchChange }: HistoryHeaderProp
             My Submissions Ledger
           </h1>
           <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-headline font-semibold bg-white/[0.06] border border-white/10 text-primary">
-            Academic Node #4429
+            Live Peer Review
           </span>
         </div>
         <p className="font-body text-body-sm text-on-surface-variant mt-1">
@@ -32,10 +39,29 @@ export function HistoryHeader({ searchQuery, onSearchChange }: HistoryHeaderProp
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Filter by project or hash..."
+            placeholder="Filter by project or ID..."
             className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-9 pr-3 py-2 text-body-sm text-white placeholder:text-outline focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all backdrop-blur-md"
           />
         </div>
+
+        {/* Refresh button */}
+        {onRefresh && (
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            title="Refresh submissions from server"
+            className="p-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-on-surface hover:text-white transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+          >
+            <span
+              className={`material-symbols-outlined text-lg block ${
+                isRefreshing ? "animate-spin text-primary" : ""
+              }`}
+            >
+              refresh
+            </span>
+          </button>
+        )}
 
         {/* New Submission Quick Action */}
         <Link

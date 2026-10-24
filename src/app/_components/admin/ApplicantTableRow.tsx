@@ -1,6 +1,7 @@
 "use client";
 
 import { StatusBadge } from "@/app/_components/ui/StatusBadge";
+import { showInfoAlert } from "@/lib/alert";
 
 export interface MentorApplicant {
   id: string;
@@ -221,7 +222,10 @@ export function ApplicantTableRow({
             <button
               type="button"
               onClick={() =>
-                alert(`Managing mentor node privileges for ${applicant.name}.`)
+                showInfoAlert(
+                  "Mentor Node Management",
+                  `Managing mentor node privileges for ${applicant.name}.`
+                )
               }
               className="bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-white px-3.5 py-1.5 rounded-xl text-xs font-headline font-semibold backdrop-blur-md transition-all flex items-center gap-1.5 cursor-pointer"
             >

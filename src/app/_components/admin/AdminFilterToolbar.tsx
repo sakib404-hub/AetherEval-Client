@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { showInfoAlert } from "@/lib/alert";
 
 export type AdminFilterStatus = "pending" | "active" | "rejected";
 
@@ -150,7 +151,7 @@ export function AdminFilterToolbar({
         ) : (
           <button
             type="button"
-            onClick={() => alert("Batch applicant queue selection enabled.")}
+            onClick={() => showInfoAlert("Batch Actions", "Batch applicant queue selection enabled.")}
             className="px-4 py-2 rounded-xl bg-gradient-to-r from-primary-container/80 to-secondary-container/80 hover:from-primary-container hover:to-secondary-container border border-primary/40 text-white font-headline text-xs shadow-[0_0_18px_rgba(124,58,237,0.3)] flex items-center gap-2 transition-all cursor-pointer active:scale-95"
           >
             <span className="material-symbols-outlined text-[18px]">rule_folder</span>

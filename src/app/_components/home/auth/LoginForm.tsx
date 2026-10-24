@@ -1,60 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { GlassInput } from "../../ui/GlassInput";
 import { GlassButton } from "../../ui/GlassButton";
+import { loginAction } from "@/app/_actions/auth/loginAction";
+import { showSuccessAlert, showErrorAlert, showInfoAlert } from "@/lib/alert";
 
 export function LoginForm() {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberSession, setRememberSession] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loginSuccess, setLoginSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setError(null);
 
-    // Simulate session authentication (Frontend-First)
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setLoginSuccess(true);
-    }, 1000);
+    const formData = new FormData(e.currentTarget);
+
+    startTransition(async () => {
+      const result = await loginAction(null, formData);
+
+      if (result.success) {
+        showSuccessAlert("Login Successful", "Welcome back to your academic node.");
+        const normalizedRole = (
+          result.role ||
+          (result.data as { user?: { role?: string } })?.user?.role ||
+          ""
+        ).toUpperCase();
+
+        if (normalizedRole === "ADMIN") {
+          router.push("/admin-dashboard");
+        } else if (normalizedRole === "MENTOR") {
+          router.push("/mentor-dashboard");
+        } else {
+          router.push("/student-dashboard");
+        }
+      } else {
+        const msg = result.message || "Invalid academic credentials. Please try again.";
+        setError(msg);
+        showErrorAlert("Login Failed", msg);
+      }
+    });
   };
-
-  if (loginSuccess) {
-    return (
-      <div className="py-8 text-center space-y-4">
-        <div className="w-16 h-16 rounded-3xl bg-primary-container/30 border border-primary/50 text-primary mx-auto flex items-center justify-center shadow-[0_0_24px_rgba(124,58,237,0.4)]">
-          <span className="material-symbols-outlined text-3xl">token</span>
-        </div>
-        <h4 className="font-headline text-headline-sm font-bold text-white">
-          Session Authenticated!
-        </h4>
-        <p className="font-body text-body-sm text-on-surface-variant max-w-sm mx-auto">
-          Welcome back to the AetherEval Core Protocol. Your academic credentials have
-          been verified for this session.
-        </p>
-        <div className="pt-2">
-          <GlassButton
-            variant="primary"
-            size="md"
-            icon="dashboard"
-            onClick={() => setLoginSuccess(false)}
-          >
-            Access Node Dashboard
-          </GlassButton>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Error Feedback State */}
+      {error && (
+        <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-headline flex items-center gap-2.5 shadow-sm">
+          <span className="material-symbols-outlined text-[18px] text-rose-400 shrink-0">
+            error
+          </span>
+          <span className="leading-snug">{error}</span>
+        </div>
+      )}
+
       {/* Node Identifier / Academic Email */}
       <GlassInput
         label="Academic Email / Node ID"
+        name="email"
         type="email"
         icon="fingerprint"
         placeholder="elena.vance@mit.edu or 0x71C...a429"
@@ -66,6 +76,7 @@ export function LoginForm() {
       {/* Master Key / Password */}
       <GlassInput
         label="Master Key / Passphrase"
+        name="password"
         type={showPassword ? "text" : "password"}
         icon="lock"
         placeholder="••••••••••••"
@@ -91,6 +102,7 @@ export function LoginForm() {
         <label className="flex items-center gap-2 cursor-pointer group">
           <input
             type="checkbox"
+            name="rememberSession"
             checked={rememberSession}
             onChange={(e) => setRememberSession(e.target.checked)}
             className="w-4 h-4 rounded border-white/20 bg-white/5 text-primary focus:ring-primary/40 focus:ring-offset-0 cursor-pointer"
@@ -102,7 +114,12 @@ export function LoginForm() {
 
         <button
           type="button"
-          onClick={() => alert("Identity recovery sequence initiated. Check your verified academic email.")}
+          onClick={() =>
+            showInfoAlert(
+              "Identity Recovery Initiated",
+              "Check your verified academic email inbox for recovery steps."
+            )
+          }
           className="text-primary hover:text-purple-300 transition-colors cursor-pointer"
         >
           Recover Identity?
@@ -115,11 +132,13 @@ export function LoginForm() {
           variant="primary"
           size="lg"
           type="submit"
-          disabled={isSubmitting}
-          icon={isSubmitting ? "hourglass_empty" : "login"}
-          className="w-full shadow-[0_0_24px_rgba(124,58,237,0.4)]"
+          disabled={isPending}
+          icon={isPending ? "progress_activity" : "login"}
+          className={`w-full shadow-[0_0_24px_rgba(124,58,237,0.4)] ${
+            isPending ? "[&_.material-symbols-outlined]:animate-spin" : ""
+          }`}
         >
-          {isSubmitting ? "Validating Session Keys..." : "Authenticate Session"}
+          {isPending ? "Signing In..." : "Sign In"}
         </GlassButton>
       </div>
     </form>

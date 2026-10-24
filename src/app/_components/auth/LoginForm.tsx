@@ -1,62 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { loginAction } from "@/app/_actions/auth/loginAction";
+import { showSuccessAlert, showErrorAlert, showInfoAlert } from "@/lib/alert";
 
 interface LoginFormProps {
-  onSwitchToRegister: () => void;
+  onSwitchToRegister?: () => void;
 }
 
 export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberSession, setRememberSession] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setError(null);
 
-    // Simulate session authentication
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-    }, 1000);
+    const formData = new FormData(e.currentTarget);
+
+    startTransition(async () => {
+      const result = await loginAction(null, formData);
+
+      if (result.success) {
+        showSuccessAlert("Authentication Succeeded", "Welcome back to your academic node.");
+        const normalizedRole = (
+          result.role ||
+          (result.data as { user?: { role?: string } })?.user?.role ||
+          ""
+        ).toUpperCase();
+
+        if (normalizedRole === "ADMIN") {
+          router.push("/admin-dashboard");
+        } else if (normalizedRole === "MENTOR") {
+          router.push("/mentor-dashboard");
+        } else {
+          router.push("/student-dashboard");
+        }
+      } else {
+        const msg = result.message || "Invalid academic credentials. Please try again.";
+        setError(msg);
+        showErrorAlert("Authentication Failed", msg);
+      }
+    });
   };
-
-  if (isSuccess) {
-    return (
-      <div className="py-8 text-center space-y-5">
-        <div className="w-16 h-16 rounded-3xl bg-primary-container/30 border border-primary/50 text-primary mx-auto flex items-center justify-center shadow-[0_0_24px_rgba(124,58,237,0.45)]">
-          <span className="material-symbols-outlined text-3xl">token</span>
-        </div>
-        <div>
-          <h3 className="font-headline text-headline-sm font-bold text-white mb-1.5">
-            Node Session Authorized!
-          </h3>
-          <p className="font-body text-body-sm text-on-surface-variant max-w-sm mx-auto leading-relaxed">
-            Identity verified on the AetherEval Core Protocol. Your evaluation privileges and submission
-            queues are unlocked.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setIsSuccess(false)}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium py-3 px-6 rounded-xl shadow-[0_0_25px_rgba(124,58,237,0.45)] hover:shadow-[0_0_35px_rgba(124,58,237,0.65)] transition-all inline-flex items-center gap-2 cursor-pointer"
-        >
-          <span>Return to Dashboard</span>
-          <span className="material-symbols-outlined text-base">dashboard</span>
-        </button>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Error Feedback State */}
+      {error && (
+        <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-headline flex items-center gap-2.5 shadow-[0_0_16px_rgba(244,63,94,0.15)] backdrop-blur-md">
+          <span className="material-symbols-outlined text-[18px] text-rose-400 shrink-0">
+            error
+          </span>
+          <span className="leading-snug">{error}</span>
+        </div>
+      )}
+
       {/* Email / Node Identifier */}
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 text-left">
         <label className="block font-headline text-label-md text-on-surface">
           Academic Email or Node ID
         </label>
@@ -66,24 +74,30 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
           </span>
           <input
             type="email"
+            name="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="elena.vance@mit.edu or node@ox71...a429"
-            className="w-full bg-white/[0.04] border border-white/10 focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 text-white placeholder-slate-400 font-body text-body-md rounded-xl pl-12 pr-4 py-3.5 transition-all duration-200 outline-none"
+            className="w-full bg-white/[0.04] hover:bg-white/[0.06] border border-white/10 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 text-white placeholder-slate-400 font-body text-body-md rounded-2xl pl-12 pr-4 py-3.5 transition-all duration-200 outline-none backdrop-blur-md shadow-inner"
           />
         </div>
       </div>
 
       {/* Master Key / Password */}
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 text-left">
         <div className="flex justify-between items-center">
           <label className="block font-headline text-label-md text-on-surface">
             Master Key / Passphrase
           </label>
           <button
             type="button"
-            onClick={() => alert("Identity recovery sequence initiated. Check your verified academic email inbox.")}
+            onClick={() =>
+              showInfoAlert(
+                "Identity Recovery Initiated",
+                "Check your verified academic email inbox for password reset instructions."
+              )
+            }
             className="text-[11px] font-headline text-primary hover:text-purple-300 transition-colors cursor-pointer"
           >
             Recover Identity?
@@ -95,11 +109,12 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
           </span>
           <input
             type={showPassword ? "text" : "password"}
+            name="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••••••"
-            className="w-full bg-white/[0.04] border border-white/10 focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 text-white placeholder-slate-400 font-body text-body-md rounded-xl pl-12 pr-11 py-3.5 transition-all duration-200 outline-none"
+            className="w-full bg-white/[0.04] hover:bg-white/[0.06] border border-white/10 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 text-white placeholder-slate-400 font-body text-body-md rounded-2xl pl-12 pr-11 py-3.5 transition-all duration-200 outline-none backdrop-blur-md shadow-inner"
           />
           <button
             type="button"
@@ -119,9 +134,10 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         <label className="flex items-center gap-2.5 cursor-pointer group">
           <input
             type="checkbox"
+            name="rememberSession"
             checked={rememberSession}
             onChange={(e) => setRememberSession(e.target.checked)}
-            className="w-4 h-4 rounded bg-white/[0.05] border-white/20 text-primary-container focus:ring-primary-container focus:ring-offset-0 focus:ring-1 cursor-pointer"
+            className="w-4 h-4 rounded-md bg-white/[0.05] border-white/20 text-primary-container focus:ring-primary-container focus:ring-offset-0 focus:ring-1 cursor-pointer"
           />
           <span className="text-on-surface-variant group-hover:text-white transition-colors">
             Preserve node cryptographic session
@@ -129,34 +145,41 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         </label>
       </div>
 
-      {/* Submit Button */}
+      {/* Submit Button (Styled according to Glassmorphism standards and labelled 'Sign In') */}
       <button
         type="submit"
-        disabled={isSubmitting}
-        className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium py-4 px-6 rounded-xl shadow-[0_0_25px_rgba(124,58,237,0.45)] hover:shadow-[0_0_35px_rgba(124,58,237,0.65)] transition-all flex items-center justify-center gap-2 cursor-pointer w-full text-base tracking-wide active:scale-[0.98] disabled:opacity-60"
+        disabled={isPending}
+        className="w-full bg-gradient-to-r from-primary-container via-purple-600 to-[#4C1D95] hover:brightness-110 text-white font-headline font-semibold py-4 px-6 rounded-2xl border border-white/25 shadow-[0_0_28px_rgba(124,58,237,0.5)] hover:shadow-[0_0_38px_rgba(124,58,237,0.8)] transition-all flex items-center justify-center gap-2.5 cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-base tracking-wide"
       >
-        <span className="font-semibold text-white">
-          {isSubmitting ? "Authenticating Session Keys..." : "Sign In to Node"}
-        </span>
-        <span className="material-symbols-outlined text-[20px]">
-          {isSubmitting ? "hourglass_empty" : "login"}
-        </span>
+        {isPending ? (
+          <>
+            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span>Signing In...</span>
+          </>
+        ) : (
+          <>
+            <span>Sign In</span>
+            <span className="material-symbols-outlined text-xl">login</span>
+          </>
+        )}
       </button>
 
       {/* Bottom Switch to Register */}
-      <div className="text-center pt-3">
-        <p className="font-body text-body-sm text-on-surface-variant">
-          Need to initialize a new node?{" "}
-          <button
-            type="button"
-            onClick={onSwitchToRegister}
-            className="text-primary hover:text-purple-300 font-semibold ml-1 hover:underline transition-colors duration-150 inline-flex items-center gap-1 cursor-pointer"
-          >
-            Create your account
-            <span className="material-symbols-outlined text-[14px]">how_to_reg</span>
-          </button>
-        </p>
-      </div>
+      {onSwitchToRegister && (
+        <div className="text-center pt-3">
+          <p className="font-body text-body-sm text-on-surface-variant">
+            Need to initialize a new node?{" "}
+            <button
+              type="button"
+              onClick={onSwitchToRegister}
+              className="text-primary hover:text-purple-300 font-semibold ml-1 hover:underline transition-colors duration-150 inline-flex items-center gap-1 cursor-pointer"
+            >
+              Create your account
+              <span className="material-symbols-outlined text-[14px]">how_to_reg</span>
+            </button>
+          </p>
+        </div>
+      )}
     </form>
   );
 }

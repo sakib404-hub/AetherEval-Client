@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { RoleToggle, RoleType } from "./RoleToggle";
 import { PasswordEntropyBar } from "./PasswordEntropyBar";
 import { MentorFields } from "./MentorFields";
+import { registerAction } from "@/app/_actions/auth/registerAction";
+import { showSuccessAlert, showErrorAlert, showWarningAlert } from "@/lib/alert";
 
 export function RegisterCard() {
+  const router = useRouter();
   const [role, setRole] = useState<RoleType>("student");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,7 +26,7 @@ export function RegisterCard() {
 
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Real-time detection of academic / .edu domain
   const isRecognizedDomain =
@@ -32,23 +36,69 @@ export function RegisterCard() {
     email.trim().toLowerCase().endsWith(".edu.in") ||
     email.trim().toLowerCase().endsWith(".edu.sg");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrorMessage(null);
+
     if (!agreeTerms) {
-      alert("Please accept the Academic Evaluation Guidelines & Privacy Protocol.");
+      showWarningAlert("Action Required", "Please accept the Academic Evaluation Guidelines & Privacy Protocol.");
       return;
     }
     if (password !== confirmPassword) {
-      alert("Passwords do not match. Please verify your passkeys.");
+      showErrorAlert("Validation Error", "Passwords do not match. Please verify your passkeys.");
+      return;
+    }
+    if (password.length < 6) {
+      showErrorAlert("Validation Error", "Password must be at least 6 characters long.");
       return;
     }
 
+    if (role === "mentor") {
+      if (!expertise.trim()) {
+        showWarningAlert("Required Field", "Please provide your area of technical expertise.");
+        return;
+      }
+      if (!portfolio.trim()) {
+        showWarningAlert("Required Field", "Please provide your portfolio or GitHub profile link.");
+        return;
+      }
+      if (!bio.trim()) {
+        showWarningAlert("Required Field", "Please provide a short bio or mentorship background.");
+        return;
+      }
+    }
+
     setIsSubmitting(true);
-    // Simulate cryptographic key attestation
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-    }, 1200);
+
+    const formData = new FormData(e.currentTarget);
+    formData.set("role", role);
+    formData.set("name", fullName);
+    formData.set("email", email);
+    formData.set("password", password);
+    formData.set("confirmPassword", confirmPassword);
+
+    if (role === "mentor") {
+      formData.set("expertise", expertise);
+      formData.set("portfolioUrl", portfolio);
+      formData.set("bio", bio);
+    }
+
+    const result = await registerAction(null, formData);
+    setIsSubmitting(false);
+
+    if (result.success) {
+      const successMsg =
+        result.message ||
+        (role === "mentor"
+          ? "Mentor application submitted successfully! Please sign in."
+          : "Student registration successful! Please sign in.");
+      showSuccessAlert("Registration Successful", successMsg);
+      router.push("/login");
+    } else {
+      const errMsg = result.message || "Registration failed. Please check your credentials.";
+      setErrorMessage(errMsg);
+      showErrorAlert("Registration Failed", errMsg);
+    }
   };
 
   return (
@@ -102,53 +152,40 @@ export function RegisterCard() {
           </p>
         </div>
 
-        {isSuccess ? (
-          <div className="py-8 text-center space-y-5">
-            <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 mx-auto flex items-center justify-center shadow-[0_0_24px_rgba(52,211,153,0.35)]">
-              <span className="material-symbols-outlined text-3xl">verified</span>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Error Feedback State */}
+          {errorMessage && (
+            <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-headline flex items-center gap-2.5 shadow-[0_0_16px_rgba(244,63,94,0.15)] backdrop-blur-md">
+              <span className="material-symbols-outlined text-[18px] text-rose-400 shrink-0">
+                error
+              </span>
+              <span className="leading-snug">{errorMessage}</span>
             </div>
-            <div>
-              <h3 className="font-headline text-headline-sm font-bold text-white mb-1.5">
-                Node Identity Attested!
-              </h3>
-              <p className="font-body text-body-sm text-on-surface-variant max-w-sm mx-auto leading-relaxed">
-                {role === "student"
-                  ? "Your Student Node is active. Instant repository submission permissions have been minted to your session."
-                  : "Your Mentor Application has been anchored to the review queue. The institutional review board will verify credentials within 24-48 hours."}
-              </p>
+          )}
+
+          {/* Role Toggle (Frosted Segmented Bar with Spring Animation) */}
+          <RoleToggle currentRole={role} onChangeRole={setRole} />
+          <input type="hidden" name="role" value={role} />
+
+          {/* Full Name Field */}
+          <div className="space-y-1.5">
+            <label className="block font-headline text-label-md text-on-surface">
+              Full Name
+            </label>
+            <div className="relative flex items-center">
+              <span className="absolute left-4 text-on-surface-variant material-symbols-outlined text-[20px] pointer-events-none">
+                person
+              </span>
+              <input
+                type="text"
+                name="name"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Dr. Elena Vance or Alex Rivera"
+                className="w-full bg-white/[0.04] border border-white/10 focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 text-white placeholder-slate-400 font-body text-body-md rounded-xl pl-12 pr-4 py-3.5 transition-all duration-200 outline-none"
+              />
             </div>
-
-            <Link
-              href="/login"
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium py-3 px-6 rounded-xl shadow-[0_0_25px_rgba(124,58,237,0.45)] hover:shadow-[0_0_35px_rgba(124,58,237,0.65)] transition-all inline-flex items-center gap-2 cursor-pointer"
-            >
-              <span>Sign In to Access Portal</span>
-              <span className="material-symbols-outlined text-base">login</span>
-            </Link>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Role Toggle (Frosted Segmented Bar with Spring Animation) */}
-            <RoleToggle currentRole={role} onChangeRole={setRole} />
-
-            {/* Full Name Field */}
-            <div className="space-y-1.5">
-              <label className="block font-headline text-label-md text-on-surface">
-                Full Name
-              </label>
-              <div className="relative flex items-center">
-                <span className="absolute left-4 text-on-surface-variant material-symbols-outlined text-[20px] pointer-events-none">
-                  person
-                </span>
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Dr. Elena Vance or Alex Rivera"
-                  className="w-full bg-white/[0.04] border border-white/10 focus:border-purple-500/80 focus:ring-2 focus:ring-purple-500/20 text-white placeholder-slate-400 font-body text-body-md rounded-xl pl-12 pr-4 py-3.5 transition-all duration-200 outline-none"
-                />
-              </div>
             </div>
 
             {/* Academic / Institutional Email Field */}
@@ -174,6 +211,7 @@ export function RegisterCard() {
                 </span>
                 <input
                   type="email"
+                  name="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -196,6 +234,7 @@ export function RegisterCard() {
                   </span>
                   <input
                     type={showPassword ? "text" : "password"}
+                    name="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -226,6 +265,7 @@ export function RegisterCard() {
                   </span>
                   <input
                     type={showPassword ? "text" : "password"}
+                    name="confirmPassword"
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -311,8 +351,7 @@ export function RegisterCard() {
               </p>
             </div>
           </form>
-        )}
-      </div>
-    </motion.div>
+        </div>
+      </motion.div>
   );
 }

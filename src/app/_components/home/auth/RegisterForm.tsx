@@ -5,6 +5,7 @@ import { GlassInput } from "../../ui/GlassInput";
 import { GlassButton } from "../../ui/GlassButton";
 import { RoleSelector, RoleType } from "./RoleSelector";
 import { PasswordStrengthMeter } from "./PasswordStrengthMeter";
+import { showWarningAlert, showErrorAlert } from "@/lib/alert";
 
 interface RegisterFormProps {
   onSuccessSwitch?: () => void;
@@ -36,11 +37,11 @@ export function RegisterForm({ onSuccessSwitch }: RegisterFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreeHonorCode) {
-      alert("Please accept the Academic Honor Code to initialize your node.");
+      showWarningAlert("Action Required", "Please accept the Academic Honor Code to initialize your node.");
       return;
     }
     if (password !== confirmPassword) {
-      alert("Passwords do not match. Please verify your passkeys.");
+      showErrorAlert("Validation Error", "Passwords do not match. Please verify your passkeys.");
       return;
     }
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { showInfoAlert } from "@/lib/alert";
+
 interface InstitutionalSSOProps {
   onSelectProvider?: (provider: string) => void;
 }
@@ -9,7 +11,7 @@ export function InstitutionalSSO({ onSelectProvider }: InstitutionalSSOProps) {
     if (onSelectProvider) {
       onSelectProvider(name);
     } else {
-      alert(`Initializing ${name} institutional credential handshake...`);
+      showInfoAlert("Institutional SSO Handshake", `Initializing ${name} institutional credential handshake...`);
     }
   };
 

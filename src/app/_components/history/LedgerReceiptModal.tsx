@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { showSuccessAlert } from "@/lib/alert";
 
 interface LedgerReceiptModalProps {
   isOpen: boolean;
@@ -88,7 +89,12 @@ export function LedgerReceiptModal({
             <div className="pt-6 mt-4 border-t border-white/10 flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() => alert("Verification Certificate signature file (.sig) downloaded.")}
+                onClick={() =>
+                  showSuccessAlert(
+                    "Certificate Downloaded",
+                    "Verification Certificate signature file (.sig) downloaded."
+                  )
+                }
                 className="px-4 py-2.5 rounded-xl bg-primary-container/80 hover:bg-primary-container text-white font-headline text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-[0_0_16px_rgba(124,58,237,0.4)]"
               >
                 <span className="material-symbols-outlined text-sm">download</span>

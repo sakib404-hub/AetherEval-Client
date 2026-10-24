@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { showSuccessAlert } from "@/lib/alert";
 
 export type MentorFilterStatus = "all" | "pending" | "approved" | "rejected";
 
@@ -119,7 +120,12 @@ export function MentorFilterToolbar({
         {/* Quick Export/Audit Beacon */}
         <button
           type="button"
-          onClick={() => alert("Consensus ledger batch export generated. Merkle root verified.")}
+          onClick={() =>
+            showSuccessAlert(
+              "Ledger Export Generated",
+              "Consensus ledger batch export generated. Merkle root verified."
+            )
+          }
           className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white/[0.03] text-on-surface-variant hover:text-white border border-white/10 hover:border-white/20 text-xs font-headline font-medium transition-all cursor-pointer"
           title="Export current verification ledger"
         >
