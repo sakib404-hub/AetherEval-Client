@@ -64,6 +64,15 @@ export const loginAction = async (
       const decoded = jwt.decode(result.data.accessToken) as (JwtPayload & { role?: string }) | null;
       const role = (decoded?.role || result.data?.user?.role || result.data?.role || "").toUpperCase();
 
+      if (role) {
+        cookieStore.set("userRole", role, {
+          httpOnly: false,
+          sameSite: "lax",
+          maxAge: 60 * 60 * 24,
+          path: "/",
+        });
+      }
+
       revalidatePath("/", "layout");
 
       return {

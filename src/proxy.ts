@@ -8,6 +8,7 @@ const protectedRoute = [
   "/student-dashboard",
   "/mentor-dashboard",
   "/admin-dashboard",
+  "/profile"
 ];
 
 const roleBasedRoute: Record<string, string> = {
@@ -68,6 +69,11 @@ export const proxy = async (request: NextRequest) => {
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
+  //? Allow all authenticated roles (STUDENT, MENTOR, ADMIN) to access /profile
+  if (pathname === "/profile" || pathname.startsWith("/profile/")) {
+    return NextResponse.next();
+  }
+
   if(accessToken && role && isProtectedRoute){
     const expectedDashboard = roleBasedRoute[role];
 
@@ -82,6 +88,8 @@ export const config = {
   matcher: [
     "/login",
     "/register",
+    "/profile",
+    "/profile/:path*",
     "/student-dashboard/:path*",
     "/mentor-dashboard/:path*",
     "/admin-dashboard/:path*",

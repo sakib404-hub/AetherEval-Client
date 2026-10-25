@@ -18,6 +18,7 @@ export function RejectedSubmissionCard({
           month: "short",
           day: "numeric",
           year: "numeric",
+          timeZone: "UTC",
         })
       : "Recent";
 
@@ -48,7 +49,8 @@ export function RejectedSubmissionCard({
             <span className="material-symbols-outlined text-sm text-outline">
               calendar_today
             </span>
-            Original Submission: {formattedDate}
+            Original Submission:{" "}
+            <span suppressHydrationWarning>{formattedDate}</span>
           </p>
         </div>
 

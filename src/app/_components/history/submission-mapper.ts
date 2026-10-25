@@ -28,6 +28,7 @@ export function mapRawSubmissionToItem(raw: RawBackendSubmission): SubmissionIte
         month: "short",
         day: "numeric",
         year: "numeric",
+        timeZone: "UTC",
       })
     : "Recent";
 

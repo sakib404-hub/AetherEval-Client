@@ -10,6 +10,7 @@ export const logout = async () => {
   // Remove cookies
   cookieStore.delete("accessToken");
   cookieStore.delete("refreshToken");
+  cookieStore.delete("userRole");
 
   // Explicit zero-age expiration to guarantee instant browser purging
   cookieStore.set("accessToken", "", {
@@ -17,6 +18,10 @@ export const logout = async () => {
     path: "/",
   });
   cookieStore.set("refreshToken", "", {
+    maxAge: 0,
+    path: "/",
+  });
+  cookieStore.set("userRole", "", {
     maxAge: 0,
     path: "/",
   });

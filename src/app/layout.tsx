@@ -3,7 +3,7 @@ import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./globals.css";
 import { CosmicBackground } from "./_components/shared/CosmicBackground";
 import { SmoothScrollProvider } from "./_components/shared/SmoothScrollProvider";
-import { FloatingDock } from "./_components/navigation/FloatingDock";
+import { FloatingDockWrapper } from "./_components/navigation/FloatingDockWrapper";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -56,7 +56,7 @@ export default function RootLayout({
           <CosmicBackground />
 
           {/* Persistent Quantum Sidebar (Only Navigation) */}
-          <FloatingDock />
+          <FloatingDockWrapper />
 
           {/* Main Route Content Container */}
           <div className="relative z-10 flex min-h-screen flex-1 flex-col md:pl-28 px-4 md:px-8 py-8 pb-24 md:pb-8">

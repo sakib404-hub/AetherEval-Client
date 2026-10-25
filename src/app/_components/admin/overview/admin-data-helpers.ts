@@ -223,6 +223,7 @@ export function computeRegistrationTimeline(
     const key = item.dateObj.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
+      timeZone: "UTC",
     });
     dateBuckets[key] = (dateBuckets[key] || 0) + 1;
   }

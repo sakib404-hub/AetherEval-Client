@@ -1,10 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { logout } from "@/app/_actions/auth/logout";
 import { showSuccessAlert } from "@/lib/alert";
+import { getAuthSession, AuthSession } from "@/app/_actions/auth/getAuthSession";
 
 export interface NavItem {
   id: string;
@@ -23,30 +26,83 @@ const STUDENT_DASHBOARD_NAV_ITEMS: NavItem[] = [
   { id: "history", label: "History", href: "/student-dashboard", icon: "folder_managed" },
   { id: "submit", label: "Submit", href: "/student-dashboard/submit", icon: "cloud_upload" },
   { id: "resubmit", label: "Resubmit", href: "/student-dashboard/resubmit", icon: "published_with_changes" },
+  { id: "profile", label: "Profile", href: "/student-dashboard/profile", icon: "account_circle" },
 ];
 
 const MENTOR_DASHBOARD_NAV_ITEMS: NavItem[] = [
   { id: "reviews", label: "Reviews", href: "/mentor-dashboard", icon: "fact_check" },
+  { id: "profile", label: "Profile", href: "/mentor-dashboard/profile", icon: "account_circle" },
 ];
 
 const ADMIN_DASHBOARD_NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", href: "/admin-dashboard", icon: "dashboard" },
   { id: "mentors", label: "Mentors", href: "/admin-dashboard/mentors", icon: "how_to_reg" },
   { id: "reviews", label: "Reviews", href: "/admin-dashboard/reviews", icon: "fact_check" },
+  { id: "profile", label: "Profile", href: "/admin-dashboard/profile", icon: "account_circle" },
+];
+
+const PROFILE_NAV_ITEMS: NavItem[] = [
+  { id: "profile", label: "Profile", href: "/profile", icon: "account_circle" },
 ];
 
 interface FloatingDockProps {
   items?: NavItem[];
+  initialSession?: AuthSession;
 }
 
-export function FloatingDock({ items }: FloatingDockProps) {
+export function FloatingDock({ items, initialSession }: FloatingDockProps) {
   const pathname = usePathname();
 
   // Determine dashboard route contexts
   const isStudentDashboard = pathname.startsWith("/student-dashboard");
   const isMentorDashboard = pathname.startsWith("/mentor-dashboard");
   const isAdminDashboard = pathname.startsWith("/admin-dashboard");
-  const isDashboard = isStudentDashboard || isMentorDashboard || isAdminDashboard;
+  const isProfile = pathname === "/profile" || pathname.startsWith("/profile");
+  const isDashboard = isStudentDashboard || isMentorDashboard || isAdminDashboard || isProfile;
+
+  // Track authenticated session state - initialized strictly from SSR initialSession to avoid hydration mismatch
+  const [authSession, setAuthSession] = useState<AuthSession>(
+    initialSession || { isAuthenticated: false, role: null, dashboardHref: null }
+  );
+
+  // Sync state if initialSession prop changes
+  useEffect(() => {
+    if (initialSession) {
+      setAuthSession(initialSession);
+    }
+  }, [initialSession]);
+
+  // Re-verify session on mount and route changes
+  useEffect(() => {
+    let isMounted = true;
+
+    // Check client cookie immediately on post-mount
+    if (typeof document !== "undefined") {
+      const match = document.cookie.match(/(^|;\s*)userRole=([^;]*)/);
+      const role = match ? decodeURIComponent(match[2]).toUpperCase() : null;
+      if (role) {
+        const href =
+          role === "ADMIN"
+            ? "/admin-dashboard"
+            : role === "MENTOR"
+            ? "/mentor-dashboard"
+            : "/student-dashboard";
+        setAuthSession({ isAuthenticated: true, role, dashboardHref: href });
+      }
+    }
+
+    getAuthSession().then((session) => {
+      if (isMounted) {
+        setAuthSession(session);
+        if (session.isAuthenticated && session.role && typeof document !== "undefined") {
+          document.cookie = `userRole=${session.role}; path=/; max-age=86400; SameSite=Lax`;
+        }
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [pathname]);
 
   // Select active nav list
   let activeNavItems = items;
@@ -57,10 +113,27 @@ export function FloatingDock({ items }: FloatingDockProps) {
       activeNavItems = MENTOR_DASHBOARD_NAV_ITEMS;
     } else if (isAdminDashboard) {
       activeNavItems = ADMIN_DASHBOARD_NAV_ITEMS;
+    } else if (isProfile) {
+      activeNavItems = PROFILE_NAV_ITEMS;
+    } else if (authSession.isAuthenticated && authSession.dashboardHref) {
+      // User is logged in on root / public routes:
+      // Show Overview, How It Works, and their Respected Dashboard (without Login button!)
+      activeNavItems = [
+        { id: "overview", label: "Overview", href: "/", icon: "dashboard" },
+        { id: "how-it-works", label: "How It Works", href: "/how-it-works", icon: "schema" },
+        {
+          id: "dashboard",
+          label: "Dashboard",
+          href: authSession.dashboardHref,
+          icon: "space_dashboard",
+        },
+      ];
     } else {
       activeNavItems = PUBLIC_NAV_ITEMS;
     }
   }
+
+  const showLogout = isDashboard || authSession.isAuthenticated;
 
   const itemCount = activeNavItems.length;
 
@@ -80,6 +153,9 @@ export function FloatingDock({ items }: FloatingDockProps) {
     if (href === "/admin-dashboard") {
       return pathname === "/admin-dashboard";
     }
+    if (href === "/profile" || href.endsWith("/profile")) {
+      return pathname === "/profile" || pathname.endsWith("/profile");
+    }
     if (href === "/login") {
       return pathname.startsWith("/login") || pathname.startsWith("/register");
     }
@@ -89,6 +165,10 @@ export function FloatingDock({ items }: FloatingDockProps) {
   const handleLogout = async (e: React.FormEvent) => {
     e.preventDefault();
     showSuccessAlert("Logged Out", "Session terminated successfully.");
+    setAuthSession({ isAuthenticated: false, role: null, dashboardHref: null });
+    if (typeof document !== "undefined") {
+      document.cookie = "userRole=; path=/; max-age=0";
+    }
     await logout();
   };
 
@@ -102,16 +182,36 @@ export function FloatingDock({ items }: FloatingDockProps) {
          ========================================================================= */}
       <aside
         aria-label="Quantum Portal Navigation Dock"
-        className={`hidden md:flex flex-col items-center w-20 md:w-22 rounded-3xl bg-white/[0.04] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-40 fixed left-4 transition-all duration-300 flex-shrink-0 ${
-          isCompact
-            ? "top-1/2 -translate-y-1/2 h-auto pt-10 pb-8 gap-4"
-            : "top-4 h-[calc(100vh-2rem)] pt-14 pb-14 justify-center"
+        suppressHydrationWarning
+        className={`hidden md:flex flex-col items-center w-20 md:w-22 rounded-3xl bg-white/[0.04] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-40 fixed left-4 top-1/2 -translate-y-1/2 transition-all duration-300 flex-shrink-0 ${
+          showLogout
+            ? "h-[68vh] max-h-[560px] min-h-[420px] py-5 justify-between"
+            : "h-auto py-8 gap-3.5"
         }`}
       >
+        {/* Top Favicon / Logo: Link to Root Route (/) */}
+        {isDashboard && (
+          <div className="pb-2.5 border-b border-white/10 w-full flex justify-center mb-1 shrink-0">
+            <Link
+              href="/"
+              title="Return to AetherEval Home (/)"
+              className="relative flex items-center justify-center w-11 h-11 rounded-2xl bg-white/[0.04] hover:bg-white/[0.1] border border-white/15 hover:border-primary/50 shadow-[0_0_16px_rgba(124,58,237,0.2)] hover:shadow-[0_0_24px_rgba(124,58,237,0.5)] transition-all duration-300 group cursor-pointer"
+            >
+              <Image
+                src="/favicon.svg"
+                alt="AetherEval Home"
+                width={26}
+                height={26}
+                className="w-6.5 h-6.5 object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_0_8px_rgba(124,58,237,0.5)]"
+              />
+            </Link>
+          </div>
+        )}
+
         {/* Navigation Items Stack with Smooth Gliding Capsule Transition */}
         <nav
           aria-label="Portal Navigation"
-          className="flex flex-col items-center gap-3 w-full px-2.5 relative"
+          className="flex flex-col items-center gap-2.5 w-full px-2.5 relative"
         >
           {activeNavItems.map((item) => {
             const isActive = isItemActive(item.href);
@@ -176,9 +276,9 @@ export function FloatingDock({ items }: FloatingDockProps) {
           })}
         </nav>
 
-        {/* Bottom Utility: Logout Button for Dashboard sessions (Student, Mentor & Admin) */}
-        {isDashboard && (
-          <div className="pt-2 border-t border-white/10 w-full px-2.5 mt-1">
+        {/* Bottom Utility: Logout Button pinned at the end of the sidebar for Dashboard and authenticated sessions */}
+        {showLogout && (
+          <div className="mt-auto pt-3 border-t border-white/10 w-full px-2.5">
             <form onSubmit={handleLogout} className="w-full">
               <button
                 type="submit"
@@ -202,8 +302,24 @@ export function FloatingDock({ items }: FloatingDockProps) {
          ========================================================================= */}
       <nav
         aria-label="Mobile Navigation Dock"
+        suppressHydrationWarning
         className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[#0d091b]/90 backdrop-blur-2xl border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.65)] max-w-[92vw]"
       >
+        {isDashboard && (
+          <Link
+            href="/"
+            title="Return to Home (/)"
+            className="flex items-center justify-center w-8 h-8 rounded-xl bg-white/[0.04] border border-white/10 hover:border-white/20 transition-all cursor-pointer mr-0.5 shrink-0"
+          >
+            <Image
+              src="/favicon.svg"
+              alt="AetherEval Home"
+              width={18}
+              height={18}
+              className="w-4.5 h-4.5 object-contain"
+            />
+          </Link>
+        )}
         {activeNavItems.map((item) => {
           const isActive = isItemActive(item.href);
 
@@ -244,7 +360,7 @@ export function FloatingDock({ items }: FloatingDockProps) {
           );
         })}
 
-        {isDashboard && (
+        {showLogout && (
           <form onSubmit={handleLogout}>
             <button
               type="submit"

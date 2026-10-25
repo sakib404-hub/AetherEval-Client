@@ -30,6 +30,7 @@ export function AdminRecentActivityFeed({
               day: "numeric",
               hour: "2-digit",
               minute: "2-digit",
+              timeZone: "UTC",
             })
           : "Recent",
         icon: isPending ? "how_to_reg" : isActive ? "verified" : "cancel",

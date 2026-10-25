@@ -88,6 +88,7 @@ export function AdminOperationsTable({
                             month: "short",
                             day: "numeric",
                             year: "numeric",
+                            timeZone: "UTC",
                           })
                         : "—"}
                     </td>

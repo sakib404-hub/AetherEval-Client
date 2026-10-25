@@ -65,7 +65,7 @@ export function mapRawMentorToApplicant(raw: RawBackendMentor, index: number = 0
 
   const dateObj = raw.createdAt ? new Date(raw.createdAt) : new Date();
   const appliedDate = !isNaN(dateObj.getTime())
-    ? dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    ? dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })
     : "Recent";
   const appliedTimeUtc = !isNaN(dateObj.getTime())
     ? `${String(dateObj.getUTCHours()).padStart(2, "0")}:${String(dateObj.getUTCMinutes()).padStart(2, "0")} UTC`
