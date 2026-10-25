@@ -11,8 +11,8 @@ const protectedRoute = [
 ];
 
 const roleBasedRoute: Record<string, string> = {
-  CUSTOMER: "/customer-dashboard",
-  PROVIDER: "/provider-dashboard",
+  STUDENT : "/customer-dashboard",
+  MENTOR : "/provider-dashboard",
   ADMIN: "/admin-dashboard",
 };
 
