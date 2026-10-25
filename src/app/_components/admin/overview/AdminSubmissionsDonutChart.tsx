@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { GlassCard } from "@/app/_components/ui/GlassCard";
 import { ResolvedAdminMetrics } from "./admin-data-helpers";
@@ -233,9 +234,13 @@ export function AdminSubmissionsDonutChart({
       {/* Footer Benchmark Note */}
       <div className="pt-4 border-t border-white/10 flex items-center justify-between text-body-xs font-body text-on-surface-variant">
         <span>Verified Submissions: {approved}</span>
-        <span className="text-amber-400 font-semibold font-headline">
-          {pending} Awaiting Review
-        </span>
+        <Link
+          href="/admin-dashboard/reviews"
+          className="text-amber-400 hover:text-amber-300 font-semibold font-headline flex items-center gap-1 transition-colors"
+        >
+          <span>{pending} Awaiting Review</span>
+          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+        </Link>
       </div>
     </GlassCard>
   );

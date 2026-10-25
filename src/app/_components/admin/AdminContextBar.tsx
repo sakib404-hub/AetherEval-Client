@@ -34,6 +34,13 @@ export function AdminContextBar({
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
             Mentor Queue
           </span>
+          <Link
+            href="/admin-dashboard/reviews"
+            className="inline-flex items-center gap-1 text-xs font-headline font-semibold text-cyan-300 hover:text-white transition-colors bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 rounded-full"
+          >
+            <span className="material-symbols-outlined text-[14px]">fact_check</span>
+            Submission Reviews
+          </Link>
           <span className="text-on-surface-variant text-xs font-headline">
             • Access Tier Level 4
           </span>

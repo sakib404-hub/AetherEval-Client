@@ -32,7 +32,7 @@ export function ApplicantTable({
   return (
     <section className="rounded-3xl bg-gradient-to-br from-white/[0.05] to-white/[0.02] backdrop-blur-2xl border border-white/15 overflow-hidden shadow-[0_8px_32px_0_rgba(124,58,237,0.18)] mb-8">
       {/* Scrollable Table Area */}
-      <div className="overflow-x-auto" data-lenis-prevent>
+      <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[880px]">
           <thead>
             <tr className="border-b border-white/10 bg-white/[0.02] text-[11px] font-headline font-semibold text-on-surface-variant uppercase tracking-wider">

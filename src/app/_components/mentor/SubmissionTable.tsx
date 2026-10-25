@@ -27,7 +27,7 @@ export function SubmissionTable({
   return (
     <div className="w-full rounded-3xl bg-white/[0.03] backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)] overflow-hidden">
       {/* Scrollable Table Area */}
-      <div className="overflow-x-auto" data-lenis-prevent>
+      <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[840px]">
           <thead>
             <tr className="border-b border-white/10 bg-white/[0.02]">

@@ -35,6 +35,8 @@ export function SubmissionTableRow({
 }: SubmissionTableRowProps) {
   const isApproved = item.status === "approved";
   const isRejected = item.status === "rejected";
+  const canApprove = !isApproved && !isRejected;
+  const canReject = !isApproved && !isRejected;
 
   return (
     <tr
@@ -166,13 +168,19 @@ export function SubmissionTableRow({
           {/* Quick Approve */}
           <button
             type="button"
-            onClick={() => onApprove(item.id)}
-            disabled={isApproved}
-            title={isApproved ? "Already Approved" : "Quick Approve"}
-            className={`w-8 h-8 rounded-xl flex items-center justify-center border transition-all cursor-pointer ${
+            onClick={() => canApprove && onApprove(item.id)}
+            disabled={!canApprove}
+            title={
               isApproved
-                ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 opacity-70 cursor-not-allowed"
-                : "bg-white/[0.04] hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-300 border-white/10 hover:border-emerald-500/40"
+                ? "Already Approved"
+                : isRejected
+                ? "Rejected submissions cannot be approved"
+                : "Quick Approve"
+            }
+            className={`w-8 h-8 rounded-xl flex items-center justify-center border transition-all ${
+              !canApprove
+                ? "bg-white/[0.02] text-slate-500 border-white/5 opacity-40 cursor-not-allowed"
+                : "bg-white/[0.04] hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-300 border-white/10 hover:border-emerald-500/40 cursor-pointer"
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">check</span>
@@ -181,13 +189,19 @@ export function SubmissionTableRow({
           {/* Quick Reject */}
           <button
             type="button"
-            onClick={() => onReject(item)}
-            disabled={isRejected}
-            title={isRejected ? "Already Rejected" : "Reject & Provide Feedback"}
-            className={`w-8 h-8 rounded-xl flex items-center justify-center border transition-all cursor-pointer ${
+            onClick={() => canReject && onReject(item)}
+            disabled={!canReject}
+            title={
               isRejected
-                ? "bg-rose-500/20 text-rose-400 border-rose-500/30 opacity-70 cursor-not-allowed"
-                : "bg-white/[0.04] hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border-white/10 hover:border-rose-500/40"
+                ? "Already Rejected"
+                : isApproved
+                ? "Approved submissions cannot be rejected"
+                : "Reject & Provide Feedback"
+            }
+            className={`w-8 h-8 rounded-xl flex items-center justify-center border transition-all ${
+              !canReject
+                ? "bg-white/[0.02] text-slate-500 border-white/5 opacity-40 cursor-not-allowed"
+                : "bg-white/[0.04] hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border-white/10 hover:border-rose-500/40 cursor-pointer"
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">close</span>

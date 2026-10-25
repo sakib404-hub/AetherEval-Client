@@ -22,6 +22,7 @@ const PUBLIC_NAV_ITEMS: NavItem[] = [
 const STUDENT_DASHBOARD_NAV_ITEMS: NavItem[] = [
   { id: "history", label: "History", href: "/student-dashboard", icon: "folder_managed" },
   { id: "submit", label: "Submit", href: "/student-dashboard/submit", icon: "cloud_upload" },
+  { id: "resubmit", label: "Resubmit", href: "/student-dashboard/resubmit", icon: "published_with_changes" },
 ];
 
 const MENTOR_DASHBOARD_NAV_ITEMS: NavItem[] = [
@@ -31,6 +32,7 @@ const MENTOR_DASHBOARD_NAV_ITEMS: NavItem[] = [
 const ADMIN_DASHBOARD_NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", href: "/admin-dashboard", icon: "dashboard" },
   { id: "mentors", label: "Mentors", href: "/admin-dashboard/mentors", icon: "how_to_reg" },
+  { id: "reviews", label: "Reviews", href: "/admin-dashboard/reviews", icon: "fact_check" },
 ];
 
 interface FloatingDockProps {

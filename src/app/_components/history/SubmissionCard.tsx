@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export interface SubmissionItem {
   id: string;
   title: string;
@@ -76,11 +78,20 @@ export function SubmissionCard({ item, onViewReceipt }: SubmissionCardProps) {
         )}
 
         {item.status === "rejected" && (
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-headline font-semibold bg-rose-500/10 text-rose-300 border border-rose-500/30 shadow-[0_0_12px_rgba(244,63,94,0.2)] shrink-0 self-start">
-            <span className="material-symbols-outlined text-base text-rose-400">
-              error_outline
-            </span>
-            <span>REJECTED • Action Required</span>
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-headline font-semibold bg-rose-500/10 text-rose-300 border border-rose-500/30 shadow-[0_0_12px_rgba(244,63,94,0.2)]">
+              <span className="material-symbols-outlined text-base text-rose-400">
+                error_outline
+              </span>
+              <span>REJECTED • Action Required</span>
+            </div>
+            <Link
+              href={`/student-dashboard/resubmit?submissionId=${item.id}`}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-headline font-bold bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white shadow-[0_0_16px_rgba(244,63,94,0.4)] transition-all duration-200 transform hover:scale-[1.03] active:scale-[0.97]"
+            >
+              <span className="material-symbols-outlined text-sm">published_with_changes</span>
+              <span>Resubmit</span>
+            </Link>
           </div>
         )}
       </div>
@@ -148,7 +159,7 @@ export function SubmissionCard({ item, onViewReceipt }: SubmissionCardProps) {
           )}
         </div>
 
-        {/* Health Check or Receipt Button */}
+        {/* Health Check, Receipt, or Resubmit Project Button */}
         {item.status === "approved" ? (
           <button
             type="button"
@@ -158,6 +169,14 @@ export function SubmissionCard({ item, onViewReceipt }: SubmissionCardProps) {
             <span className="material-symbols-outlined text-base">receipt_long</span>
             <span>View Verification Ledger Receipt</span>
           </button>
+        ) : item.status === "rejected" ? (
+          <Link
+            href={`/student-dashboard/resubmit?submissionId=${item.id}`}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-headline font-semibold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 transition-colors cursor-pointer shadow-[0_0_12px_rgba(244,63,94,0.2)]"
+          >
+            <span className="material-symbols-outlined text-base">restart_alt</span>
+            <span>Resubmit Project</span>
+          </Link>
         ) : (
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-headline bg-emerald-500/10 text-emerald-300 border border-emerald-500/25">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />

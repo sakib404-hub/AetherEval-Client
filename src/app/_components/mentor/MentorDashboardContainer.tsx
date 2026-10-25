@@ -118,6 +118,18 @@ export function MentorDashboardContainer({
 
   // Quick Approve Handler hitting real status update endpoint
   const handleApprove = async (id: string) => {
+    const target = submissions.find((s) => s.id === id);
+    if (target?.status === "rejected") {
+      showErrorAlert(
+        "Action Denied",
+        "Rejected submissions cannot be approved."
+      );
+      return;
+    }
+    if (target?.status === "approved") {
+      return;
+    }
+
     const result = await updateSubmissionStatus({
       submissionId: id,
       status: "APPROVED",
@@ -148,6 +160,15 @@ export function MentorDashboardContainer({
     reason: string,
     vectors: string[]
   ) => {
+    const target = submissions.find((s) => s.id === id);
+    if (target?.status === "approved") {
+      showErrorAlert(
+        "Action Denied",
+        "Approved submissions cannot be rejected."
+      );
+      return;
+    }
+
     const combinedComment = vectors.length > 0
       ? `Failure vectors: ${vectors.join(", ")}. ${reason}`.trim()
       : reason;
@@ -181,10 +202,23 @@ export function MentorDashboardContainer({
   const handleBatchApprove = async () => {
     if (selectedIds.length === 0) return;
 
+    // Filter out rejected and already approved submissions
+    const eligibleSubmissions = selectedIds
+      .map((id) => submissions.find((s) => s.id === id))
+      .filter((s): s is MentorSubmissionItem => Boolean(s && s.status !== "rejected" && s.status !== "approved"));
+
+    if (eligibleSubmissions.length === 0) {
+      showErrorAlert(
+        "Action Denied",
+        "Selected submissions are already approved or rejected. Rejected submissions cannot be approved."
+      );
+      return;
+    }
+
     let successCount = 0;
-    for (const id of selectedIds) {
+    for (const sub of eligibleSubmissions) {
       const res = await updateSubmissionStatus({
-        submissionId: id,
+        submissionId: sub.id,
         status: "APPROVED",
         reviewComment: "Batch verified via Mentor Oracle.",
       });
@@ -193,9 +227,10 @@ export function MentorDashboardContainer({
       }
     }
 
+    const eligibleIds = eligibleSubmissions.map((s) => s.id);
     setSubmissions((prev) =>
       prev.map((sub) =>
-        selectedIds.includes(sub.id)
+        eligibleIds.includes(sub.id)
           ? { ...sub, status: "approved", score: 92 }
           : sub
       )
@@ -204,9 +239,12 @@ export function MentorDashboardContainer({
     setSelectedIds([]);
 
     if (successCount > 0) {
+      const skippedRejected = selectedIds.length - eligibleSubmissions.length;
       showSuccessAlert(
         "Batch Update Completed",
-        `Successfully approved ${successCount} submissions on the evaluation ledger.`
+        skippedRejected > 0
+          ? `Successfully approved ${successCount} submissions (${skippedRejected} rejected/approved submissions skipped).`
+          : `Successfully approved ${successCount} submissions on the evaluation ledger.`
       );
     } else {
       showErrorAlert("Batch Approval Failed", "Unable to approve selected submissions.");
@@ -316,7 +354,16 @@ export function MentorDashboardContainer({
           onToggleSelectAll={handleToggleSelectAll}
           onToggleSelectOne={handleToggleSelectOne}
           onApprove={handleApprove}
-          onRejectClick={(item) => setRejectionTarget(item)}
+          onRejectClick={(item) => {
+            if (item.status === "approved") {
+              showErrorAlert(
+                "Action Denied",
+                "Approved submissions cannot be rejected."
+              );
+              return;
+            }
+            setRejectionTarget(item);
+          }}
         />
       ) : submissions.length === 0 ? (
         <div className="p-12 text-center rounded-3xl bg-white/[0.03] border border-white/10 text-on-surface-variant font-body space-y-3">

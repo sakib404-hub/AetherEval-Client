@@ -11,8 +11,8 @@ const protectedRoute = [
 ];
 
 const roleBasedRoute: Record<string, string> = {
-  STUDENT : "/customer-dashboard",
-  MENTOR : "/provider-dashboard",
+  STUDENT : "/student-dashboard",
+  MENTOR : "/mentor-dashboard",
   ADMIN: "/admin-dashboard",
 };
 
@@ -82,8 +82,8 @@ export const config = {
   matcher: [
     "/login",
     "/register",
-    "/customer-dashboard/:path*",
-    "/provider-dashboard/:path*",
+    "/student-dashboard/:path*",
+    "/mentor-dashboard/:path*",
     "/admin-dashboard/:path*",
   ],
 };

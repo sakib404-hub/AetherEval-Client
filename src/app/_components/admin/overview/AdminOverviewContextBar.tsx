@@ -68,15 +68,31 @@ export function AdminOverviewContextBar({
 
         <Link href="/admin-dashboard/mentors">
           <GlassButton
-            variant="primary"
+            variant="frosted"
             size="md"
             icon="how_to_reg"
-            className="shadow-[0_0_24px_rgba(124,58,237,0.4)]"
+            className="border-white/10 hover:border-primary/40 text-white"
           >
             <span>Mentor Applications</span>
             {metrics.pendingMentors > 0 && (
               <span className="ml-1.5 px-2 py-0.5 rounded-full bg-amber-400 text-black text-[10px] font-headline font-bold">
                 {metrics.pendingMentors} Pending
+              </span>
+            )}
+          </GlassButton>
+        </Link>
+
+        <Link href="/admin-dashboard/reviews">
+          <GlassButton
+            variant="primary"
+            size="md"
+            icon="fact_check"
+            className="shadow-[0_0_24px_rgba(124,58,237,0.4)]"
+          >
+            <span>Submission Reviews</span>
+            {metrics.pendingSubmissions > 0 && (
+              <span className="ml-1.5 px-2 py-0.5 rounded-full bg-cyan-400 text-black text-[10px] font-headline font-bold">
+                {metrics.pendingSubmissions} In Queue
               </span>
             )}
           </GlassButton>

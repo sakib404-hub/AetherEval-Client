@@ -32,7 +32,7 @@ export function RejectionModal({
   const [selectedVectors, setSelectedVectors] = useState<string[]>([]);
   const [justification, setJustification] = useState("");
 
-  if (!isOpen || !submission) return null;
+  if (!isOpen || !submission || submission.status === "approved") return null;
 
   const toggleVector = (vec: string) => {
     setSelectedVectors((prev) =>
