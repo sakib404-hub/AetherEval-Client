@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback, useTransition } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import { AdminContextBar } from "./AdminContextBar";
 import { AdminMetricCards } from "./AdminMetricCards";
 import {
@@ -11,142 +12,122 @@ import {
   DomainOption,
 } from "./AdminFilterToolbar";
 import { ApplicantTable } from "./ApplicantTable";
-import { ApplicantTableRow, MentorApplicant } from "./ApplicantTableRow";
+import { MentorApplicant } from "./ApplicantTableRow";
 import { AutonomousOraclePreview } from "./AutonomousOraclePreview";
 import { ApplicantRejectModal } from "./ApplicantRejectModal";
+import { RawBackendMentor, AdminStatsData } from "@/types/admin";
+import { mapRawMentorToApplicant } from "./admin-mentor-mapper";
+import { getAllMentors } from "@/app/_actions/admin/getAllMentors";
+import { getAdminStats } from "@/app/_actions/admin/getAdminStats";
+import { updateMentorStatus } from "@/app/_actions/admin/updateMentorStatus";
+import { showSuccessAlert, showErrorAlert } from "@/lib/alert";
 
-const INITIAL_APPLICANTS: MentorApplicant[] = [
-  {
-    id: "app-201",
-    name: "Dr. Aris Thorne",
-    verifiedIdentity: true,
-    email: "aris.thorne@stanford.edu",
-    institution: "Stanford University",
-    department: "Stanford AI Lab • Robotics & Systems",
-    avatarInitials: "AT",
-    avatarGradient: "from-purple-500/20 to-blue-500/20",
-    expertise: ["Distributed Consensus", "Rust", "Zero-Knowledge"],
-    githubUrl: "github.com/aris-thorne",
-    webUrl: "stanford.edu/~thorne",
-    appliedDate: "May 28, 2025",
-    appliedTimeUtc: "10:14 UTC",
-    status: "pending",
-    dnsValid: true,
-    gpgVerified: true,
-    reputationScore: 98,
-    bioSummary:
-      "Stanford Academic identity verified via institutional GPG keys and DKIM record matching. Automated cryptographic reputation score calculated across 48 peer-reviewed publications and 3 decentralized testnets.",
-  },
-  {
-    id: "app-202",
-    name: "Prof. Maya Lin",
-    verifiedIdentity: true,
-    email: "mlin@mit.edu",
-    institution: "Massachusetts Institute of Technology",
-    department: "MIT CSAIL • Cryptography & Information Security",
-    avatarInitials: "ML",
-    avatarGradient: "from-indigo-500/20 to-purple-500/20",
-    expertise: ["Post-Quantum Cryptography", "Lattice Crypto", "C++"],
-    githubUrl: "github.com/mayalin-mit",
-    appliedDate: "May 28, 2025",
-    appliedTimeUtc: "08:30 UTC",
-    status: "pending",
-    dnsValid: true,
-    gpgVerified: true,
-    reputationScore: 96,
-    bioSummary:
-      "MIT Faculty Identity attested through CSAIL institutional root keys. Authored fundamental papers on lattice-based polynomial ring signatures with 1,200+ academic citations.",
-  },
-  {
-    id: "app-203",
-    name: "Kevin Zhang",
-    verifiedIdentity: true,
-    email: "kzhang@berkeley.edu",
-    institution: "University of California, Berkeley",
-    department: "UC Berkeley • Blockchain X-Lab Lead",
-    avatarInitials: "KZ",
-    avatarGradient: "from-cyan-500/20 to-purple-500/20",
-    expertise: ["EVM Internals", "Solidity", "ZK-Rollups"],
-    webUrl: "kzhang.eth.limo",
-    appliedDate: "May 27, 2025",
-    appliedTimeUtc: "22:45 UTC",
-    status: "pending",
-    dnsValid: true,
-    gpgVerified: true,
-    reputationScore: 94,
-    bioSummary:
-      "Lead researcher at UC Berkeley Blockchain X-Lab. Contributor to Ethereum consensus client specs and zero-knowledge rollup circuit optimizations across EVM test networks.",
-  },
-  {
-    id: "app-204",
-    name: "Dr. Soraya Patel",
-    verifiedIdentity: true,
-    email: "s.patel@ox.ac.uk",
-    institution: "University of Oxford",
-    department: "Oxford Quantum Institute • Faculty of Physics",
-    avatarInitials: "SP",
-    avatarGradient: "from-violet-500/20 to-pink-500/20",
-    expertise: ["Quantum Computing", "Qiskit", "Formal Verification"],
-    webUrl: "ox.ac.uk/dept/spatel",
-    appliedDate: "May 27, 2025",
-    appliedTimeUtc: "16:10 UTC",
-    status: "pending",
-    dnsValid: true,
-    gpgVerified: true,
-    reputationScore: 97,
-    bioSummary:
-      "Senior fellow at Oxford Quantum Institute. Specializes in formally verified quantum circuits and Qiskit quantum error mitigation protocols for academic compute grids.",
-  },
-  {
-    id: "app-205",
-    name: "Dr. Julian Mercer",
-    verifiedIdentity: true,
-    email: "mercer@ethz.ch",
-    institution: "ETH Zürich",
-    department: "ETH Zürich • Machine Learning & Autonomous Systems",
-    avatarInitials: "JM",
-    avatarGradient: "from-emerald-500/20 to-purple-500/20",
-    expertise: ["Autonomous Systems", "PyTorch", "gRPC"],
-    githubUrl: "github.com/julianmercer",
-    appliedDate: "May 26, 2025",
-    appliedTimeUtc: "11:20 UTC",
-    status: "approved",
-    dnsValid: true,
-    gpgVerified: true,
-    reputationScore: 92,
-    bioSummary:
-      "Active verified mentor from ETH Zürich. Supervises graduate distributed reinforcement learning research with 8 current student teams and published consensus evaluation blocks.",
-  },
-];
+interface AdminDashboardContainerProps {
+  initialMentors?: RawBackendMentor[];
+  initialStats?: AdminStatsData | null;
+  initialError?: string | null;
+}
 
-export function AdminDashboardContainer() {
-  const [applicants, setApplicants] =
-    useState<MentorApplicant[]>(INITIAL_APPLICANTS);
+export function AdminDashboardContainer({
+  initialMentors = [],
+  initialStats = null,
+  initialError = null,
+}: AdminDashboardContainerProps) {
+  const [applicants, setApplicants] = useState<MentorApplicant[]>(() =>
+    initialMentors.map((m, idx) => mapRawMentorToApplicant(m, idx))
+  );
+  const [stats, setStats] = useState<AdminStatsData | null>(initialStats);
+  const [errorMessage, setErrorMessage] = useState<string | null>(initialError);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<AdminFilterStatus>("pending");
   const [disciplineFilter, setDisciplineFilter] =
     useState<DisciplineOption>("All Disciplines");
-  const [domainFilter, setDomainFilter] =
-    useState<DomainOption>("All Domains");
+  const [domainFilter, setDomainFilter] = useState<DomainOption>("All Domains");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [activeInspection, setActiveInspection] = useState<MentorApplicant>(
-    INITIAL_APPLICANTS[0]
+  const [activeInspection, setActiveInspection] = useState<MentorApplicant | null>(() =>
+    applicants.length > 0 ? applicants[0] : null
   );
   const [rejectionTarget, setRejectionTarget] =
     useState<MentorApplicant | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  const showNotification = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3800);
-  };
+  const handleRefresh = useCallback(() => {
+    startTransition(async () => {
+      const [mentorsRes, statsRes] = await Promise.all([
+        getAllMentors(),
+        getAdminStats(),
+      ]);
+
+      if (mentorsRes.success) {
+        const mapped = mentorsRes.data.map((m, idx) => mapRawMentorToApplicant(m, idx));
+        setApplicants(mapped);
+        if (mapped.length > 0 && !activeInspection) {
+          setActiveInspection(mapped[0]);
+        }
+        setErrorMessage(null);
+      } else {
+        setErrorMessage(mentorsRes.message);
+      }
+
+      if (statsRes.success && statsRes.data) {
+        setStats(statsRes.data);
+      }
+    });
+  }, [activeInspection]);
+
+  // Sync state whenever props update
+  useEffect(() => {
+    if (initialMentors) {
+      const mapped = initialMentors.map((m, idx) => mapRawMentorToApplicant(m, idx));
+      setApplicants(mapped);
+      if (mapped.length > 0) {
+        setActiveInspection((prev) => prev || mapped[0]);
+      }
+    }
+    if (initialStats) {
+      setStats(initialStats);
+    }
+    if (initialError !== undefined) {
+      setErrorMessage(initialError);
+    }
+  }, [initialMentors, initialStats, initialError]);
+
+  // Seamless auto-sync on mount and window focus (no hard reload required)
+  useEffect(() => {
+    let isMounted = true;
+    async function syncLatest() {
+      const [mentorsRes, statsRes] = await Promise.all([
+        getAllMentors(),
+        getAdminStats(),
+      ]);
+      if (isMounted) {
+        if (mentorsRes.success) {
+          const mapped = mentorsRes.data.map((m, idx) => mapRawMentorToApplicant(m, idx));
+          setApplicants(mapped);
+          setErrorMessage(null);
+        }
+        if (statsRes.success && statsRes.data) {
+          setStats(statsRes.data);
+        }
+      }
+    }
+    syncLatest();
+
+    const handleFocus = () => {
+      syncLatest();
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      isMounted = false;
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
 
   // Filter logic
   const filteredApplicants = applicants.filter((item) => {
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery.toLowerCase().trim();
     const matchesSearch =
+      query === "" ||
       item.name.toLowerCase().includes(query) ||
       item.email.toLowerCase().includes(query) ||
       item.institution.toLowerCase().includes(query) ||
@@ -179,54 +160,113 @@ export function AdminDashboardContainer() {
     return true;
   });
 
-  // Calculate counts
+  // Calculate real counts combining stats endpoint and active applicants
   const counts = {
-    pending: applicants.filter((a) => a.status === "pending").length + 10, // 14 total in mockup
-    active: applicants.filter((a) => a.status === "approved").length + 67, // 68 total in mockup
-    rejected: applicants.filter((a) => a.status === "rejected").length + 9, // 9 total in mockup
+    pending:
+      stats?.pendingMentors ?? applicants.filter((a) => a.status === "pending").length,
+    active:
+      stats?.activeMentors ?? applicants.filter((a) => a.status === "approved").length,
+    rejected:
+      stats?.rejectedMentors ?? applicants.filter((a) => a.status === "rejected").length,
   };
 
-  // Approve action
-  const handleApprove = (id: string) => {
-    setApplicants((prev) =>
-      prev.map((app) =>
-        app.id === id ? { ...app, status: "approved" as const } : app
-      )
-    );
+  const totalEvaluated = counts.active + counts.rejected;
+  const computedApprovalRate =
+    totalEvaluated > 0
+      ? `${Math.round((counts.active / totalEvaluated) * 100)}%`
+      : "100%";
+  const approvalRate = stats?.approvalRate ? String(stats.approvalRate) : computedApprovalRate;
+
+  // Approve action hitting real update-mentor-status route
+  const handleApprove = async (id: string) => {
     const target = applicants.find((a) => a.id === id);
-    showNotification(
-      `Candidate ${target?.name || id} approved. Mentor Node credentials minted.`
-    );
+    const result = await updateMentorStatus({
+      mentorId: id,
+      status: "APPROVED",
+    });
+
+    if (result.success) {
+      setApplicants((prev) =>
+        prev.map((app) =>
+          app.id === id ? { ...app, status: "approved" as const, verifiedIdentity: true } : app
+        )
+      );
+      showSuccessAlert(
+        "Candidate Approved",
+        result.message || `Candidate ${target?.name || id} approved. Mentor Node credentials minted.`
+      );
+    } else {
+      showErrorAlert(
+        "Approval Failed",
+        result.message || "Failed to update mentor status on evaluation network."
+      );
+    }
   };
 
-  // Reject confirmation action
-  const handleConfirmRejection = (
+  // Reject confirmation action hitting real update-mentor-status route
+  const handleConfirmRejection = async (
     id: string,
     notes: string,
     reasons: string[]
   ) => {
-    setApplicants((prev) =>
-      prev.map((app) =>
-        app.id === id ? { ...app, status: "rejected" as const } : app
-      )
-    );
-    showNotification(
-      `Candidate application disqualified. ${reasons.length} failure vectors recorded.`
-    );
+    const combinedReason = reasons.length > 0 ? `${reasons.join(", ")}. ${notes}`.trim() : notes;
+    const result = await updateMentorStatus({
+      mentorId: id,
+      status: "REJECTED",
+      rejectionReason: combinedReason || "Application did not meet accreditation criteria.",
+    });
+
+    if (result.success) {
+      setApplicants((prev) =>
+        prev.map((app) =>
+          app.id === id ? { ...app, status: "rejected" as const, verifiedIdentity: false } : app
+        )
+      );
+      showSuccessAlert(
+        "Application Disqualified",
+        result.message || `Candidate application disqualified. ${reasons.length} failure vectors recorded.`
+      );
+    } else {
+      showErrorAlert(
+        "Rejection Failed",
+        result.message || "Failed to update mentor rejection on evaluation network."
+      );
+    }
   };
 
-  // Batch approve action
-  const handleBatchApprove = () => {
+  // Batch approve action hitting real update-mentor-status route
+  const handleBatchApprove = async () => {
+    if (selectedIds.length === 0) return;
+
+    let successCount = 0;
+    for (const id of selectedIds) {
+      const res = await updateMentorStatus({
+        mentorId: id,
+        status: "APPROVED",
+      });
+      if (res.success) {
+        successCount++;
+      }
+    }
+
     setApplicants((prev) =>
       prev.map((app) =>
         selectedIds.includes(app.id)
-          ? { ...app, status: "approved" as const }
+          ? { ...app, status: "approved" as const, verifiedIdentity: true }
           : app
       )
     );
-    const count = selectedIds.length;
+
     setSelectedIds([]);
-    showNotification(`Batch approved ${count} mentor applications.`);
+
+    if (successCount > 0) {
+      showSuccessAlert(
+        "Batch Update Completed",
+        `Successfully approved ${successCount} mentor applications on the evaluation network.`
+      );
+    } else {
+      showErrorAlert("Batch Approval Failed", "Unable to approve selected candidates.");
+    }
   };
 
   const handleToggleSelectAll = (checked: boolean) => {
@@ -243,6 +283,13 @@ export function AdminDashboardContainer() {
     );
   };
 
+  const isAuthError =
+    errorMessage &&
+    (errorMessage.toLowerCase().includes("not logged in") ||
+      errorMessage.toLowerCase().includes("credentials") ||
+      errorMessage.toLowerCase().includes("forbidden") ||
+      errorMessage.toLowerCase().includes("permission"));
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -250,36 +297,60 @@ export function AdminDashboardContainer() {
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       className="max-w-7xl mx-auto w-full space-y-6 pt-1 pb-16"
     >
-      {/* Toast Feedback Notification */}
-      <AnimatePresence>
-        {toastMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="fixed top-6 right-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-slate-900/90 text-white border border-primary/40 shadow-[0_8px_32px_rgba(124,58,237,0.35)] backdrop-blur-xl"
-          >
-            <span className="material-symbols-outlined text-primary text-[20px]">
-              task_alt
-            </span>
-            <span className="text-xs font-headline font-medium">
-              {toastMessage}
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Top Header & Search Bar */}
       <AdminContextBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
 
+      {/* Auth or Forbidden Warning Banner */}
+      {isAuthError && (
+        <div className="rounded-3xl bg-amber-500/10 border border-amber-500/25 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-200 backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-2xl text-amber-400 shrink-0">
+              admin_panel_settings
+            </span>
+            <div>
+              <h4 className="font-headline font-semibold text-sm text-white">
+                Admin Authentication Required
+              </h4>
+              <p className="font-body text-xs text-amber-200/80 mt-0.5">
+                {errorMessage}
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/login"
+            className="px-4 py-2 rounded-xl bg-amber-500 text-black font-headline text-xs font-semibold hover:bg-amber-400 transition-all shrink-0 self-start sm:self-auto text-center"
+          >
+            Authenticate Admin Node
+          </Link>
+        </div>
+      )}
+
+      {/* Generic Error Warning Banner */}
+      {!isAuthError && errorMessage && (
+        <div className="rounded-3xl bg-rose-500/10 border border-rose-500/25 p-4 flex items-center justify-between gap-3 text-rose-200 text-xs backdrop-blur-xl">
+          <div className="flex items-center gap-2.5">
+            <span className="material-symbols-outlined text-lg text-rose-400">error</span>
+            <span>{errorMessage}</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            className="underline hover:text-white cursor-pointer"
+          >
+            Retry Connection
+          </button>
+        </div>
+      )}
+
       {/* 4 KPI Metric Cards */}
       <AdminMetricCards
         pendingCount={counts.pending}
         activeCount={counts.active}
         rejectedCount={counts.rejected}
+        approvalRate={approvalRate}
       />
 
       {/* Filter Toolbar (Segmented Tabs, Discipline, Domain, Batch Actions) */}
@@ -296,19 +367,63 @@ export function AdminDashboardContainer() {
       />
 
       {/* Applicants Glass Table */}
-      <ApplicantTable
-        applicants={filteredApplicants}
-        selectedIds={selectedIds}
-        activeInspectionId={activeInspection.id}
-        onToggleSelectAll={handleToggleSelectAll}
-        onToggleSelectOne={handleToggleSelectOne}
-        onSelectInspection={setActiveInspection}
-        onApprove={handleApprove}
-        onReject={(app) => setRejectionTarget(app)}
-      />
+      {filteredApplicants.length > 0 ? (
+        <ApplicantTable
+          applicants={filteredApplicants}
+          selectedIds={selectedIds}
+          activeInspectionId={activeInspection?.id || ""}
+          onToggleSelectAll={handleToggleSelectAll}
+          onToggleSelectOne={handleToggleSelectOne}
+          onSelectInspection={setActiveInspection}
+          onApprove={handleApprove}
+          onReject={(app) => setRejectionTarget(app)}
+        />
+      ) : applicants.length === 0 ? (
+        <div className="p-12 text-center rounded-3xl bg-white/[0.03] border border-white/10 text-on-surface-variant font-body space-y-3">
+          <div className="w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 text-primary mx-auto flex items-center justify-center">
+            <span className="material-symbols-outlined text-2xl">group_off</span>
+          </div>
+          <h3 className="font-headline font-semibold text-white text-base">
+            No Mentor Applications in Queue
+          </h3>
+          <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
+            Candidates who apply for mentor node accreditation will appear here for verification and GPG key attestation.
+          </p>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isPending}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-white text-xs font-headline cursor-pointer transition-all"
+          >
+            <span className={`material-symbols-outlined text-base ${isPending ? "animate-spin" : ""}`}>
+              refresh
+            </span>
+            <span>Refresh Queue</span>
+          </button>
+        </div>
+      ) : (
+        <div className="p-8 text-center rounded-3xl bg-white/[0.03] border border-white/10 text-on-surface-variant font-body text-xs space-y-2">
+          <span className="material-symbols-outlined text-xl text-outline block">
+            filter_alt_off
+          </span>
+          <div>No mentor applications match the selected status, discipline, or domain filters.</div>
+          <button
+            type="button"
+            onClick={() => {
+              setStatusFilter("pending");
+              setDisciplineFilter("All Disciplines");
+              setDomainFilter("All Domains");
+              setSearchQuery("");
+            }}
+            className="text-primary underline hover:text-primary-fixed cursor-pointer"
+          >
+            Clear Filters
+          </button>
+        </div>
+      )}
 
       {/* Autonomous Oracle Candidate Inspection Preview */}
-      <AutonomousOraclePreview applicant={activeInspection} />
+      {activeInspection && <AutonomousOraclePreview applicant={activeInspection} />}
 
       {/* Applicant Rejection Modal */}
       <ApplicantRejectModal

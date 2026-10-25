@@ -451,3 +451,273 @@
   letter-spacing: 0.08em;
   font-weight: 700;
 }
+
+/* =========================================================================
+   SweetAlert2 Cosmic Glass Bottom-Right Alert System
+   Prevents full-height stretching and applies premium Glassmorphic styling
+   ========================================================================= */
+
+/* Ensure the fixed container stays strictly anchored at the bottom-right */
+body.swal2-toast-shown,
+body.swal2-shown {
+  overflow: auto !important;
+  padding-right: 0 !important;
+}
+
+body.swal2-toast-shown div.swal2-container,
+div.swal2-container.swal2-bottom-end,
+div.swal2-container.swal2-bottom-right {
+  position: fixed !important;
+  inset: auto 24px 24px auto !important;
+  top: auto !important;
+  left: auto !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-width: calc(100vw - 48px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  justify-content: flex-end !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  background-color: transparent !important;
+  z-index: 999999 !important;
+}
+
+/* Slide in smoothly from right */
+@keyframes aether-swal-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateX(40px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes aether-swal-slide-out {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(40px) scale(0.94);
+  }
+}
+
+/* Constrain popup size, prevent vertical stretch, and apply cosmic glass styling */
+div.swal2-popup.swal2-toast,
+.aether-swal-toast {
+  pointer-events: auto !important;
+  position: relative !important;
+  display: grid !important;
+  grid-template-areas:
+    "icon title close"
+    "icon content close" !important;
+  grid-template-columns: auto 1fr auto !important;
+  grid-template-rows: auto auto !important;
+  column-gap: 14px !important;
+  row-gap: 3px !important;
+  align-items: center !important;
+  width: auto !important;
+  min-width: 320px !important;
+  max-width: 440px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: fit-content !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 14px 18px !important;
+  background: rgba(14, 10, 26, 0.94) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border: 1px solid rgba(210, 187, 255, 0.22) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    0 20px 48px -8px rgba(0, 0, 0, 0.8),
+    0 0 24px 0 rgba(124, 58, 237, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  overflow: hidden !important;
+}
+
+div.swal2-popup.swal2-toast.swal2-show,
+.aether-swal-toast.swal2-show {
+  animation: aether-swal-slide-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+div.swal2-popup.swal2-toast.swal2-hide,
+.aether-swal-toast.swal2-hide {
+  animation: aether-swal-slide-out 0.25s cubic-bezier(0.7, 0, 0.84, 0) forwards !important;
+}
+
+/* Custom Icon badge in toast */
+div.swal2-popup.swal2-toast .swal2-icon,
+.aether-swal-icon {
+  grid-area: icon !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  max-width: 38px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+/* Hide default SweetAlert2 animated circular lines and marks so our custom icons render cleanly */
+div.swal2-popup.swal2-toast .swal2-icon .swal2-success-ring,
+div.swal2-popup.swal2-toast .swal2-icon .swal2-success-circular-line-left,
+div.swal2-popup.swal2-toast .swal2-icon .swal2-success-circular-line-right,
+div.swal2-popup.swal2-toast .swal2-icon .swal2-success-fix,
+div.swal2-popup.swal2-toast .swal2-icon .swal2-success-line-tip,
+div.swal2-popup.swal2-toast .swal2-icon .swal2-success-line-long,
+div.swal2-popup.swal2-toast .swal2-icon .swal2-x-mark,
+div.swal2-popup.swal2-toast .swal2-icon .swal2-x-mark-line-left,
+div.swal2-popup.swal2-toast .swal2-icon .swal2-x-mark-line-right {
+  display: none !important;
+}
+
+div.swal2-popup.swal2-toast .swal2-icon::before,
+div.swal2-popup.swal2-toast .swal2-icon::after {
+  display: none !important;
+}
+
+div.swal2-popup.swal2-toast .swal2-icon.swal2-success {
+  background: rgba(16, 185, 129, 0.14) !important;
+  color: #34d399 !important;
+  border-color: rgba(52, 211, 153, 0.32) !important;
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.25) !important;
+}
+
+div.swal2-popup.swal2-toast .swal2-icon.swal2-error {
+  background: rgba(244, 63, 94, 0.14) !important;
+  color: #f43f5e !important;
+  border-color: rgba(244, 63, 94, 0.32) !important;
+  box-shadow: 0 0 16px rgba(244, 63, 94, 0.25) !important;
+}
+
+div.swal2-popup.swal2-toast .swal2-icon.swal2-warning {
+  background: rgba(245, 158, 11, 0.14) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(251, 191, 36, 0.32) !important;
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.25) !important;
+}
+
+div.swal2-popup.swal2-toast .swal2-icon.swal2-info {
+  background: rgba(14, 165, 233, 0.14) !important;
+  color: #38bdf8 !important;
+  border-color: rgba(56, 189, 248, 0.32) !important;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.25) !important;
+}
+
+/* Icon text and content container */
+div.swal2-popup.swal2-toast .swal2-icon-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 20px !important;
+  width: 100% !important;
+  height: 100% !important;
+  line-height: 1 !important;
+}
+
+/* Typography alignment */
+div.swal2-popup.swal2-toast .swal2-title,
+.aether-swal-title {
+  grid-area: title !important;
+  font-family: var(--font-headline), var(--font-plus-jakarta-sans), sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.3 !important;
+  text-align: left !important;
+  align-self: end !important;
+}
+
+div.swal2-popup.swal2-toast .swal2-html-container,
+.aether-swal-desc {
+  grid-area: content !important;
+  font-family: var(--font-body), var(--font-inter), sans-serif !important;
+  font-size: 12px !important;
+  color: #d1c4e9 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.4 !important;
+  text-align: left !important;
+  align-self: start !important;
+}
+
+/* If there is no html-container content, center title vertically */
+div.swal2-popup.swal2-toast:not(:has(.swal2-html-container:not(:empty))) .swal2-title {
+  align-self: center !important;
+  grid-row: 1 / -1 !important;
+}
+
+/* Sleek close button */
+div.swal2-popup.swal2-toast .swal2-close,
+.aether-swal-close {
+  grid-area: close !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+  font-size: 18px !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 0 0 6px !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  transition: all 0.2s ease !important;
+}
+
+div.swal2-popup.swal2-toast .swal2-close:hover,
+.aether-swal-close:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Neon timer progress bar */
+div.swal2-popup.swal2-toast .swal2-timer-progress-bar,
+.aether-swal-progress {
+  height: 3px !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: linear-gradient(90deg, #7c3aed, #a855f7, #c084fc) !important;
+}
+
+/* Responsive adjustment on narrow mobile viewports */
+@media (max-width: 640px) {
+  body.swal2-toast-shown div.swal2-container,
+  div.swal2-container.swal2-bottom-end,
+  div.swal2-container.swal2-bottom-right {
+    inset: auto 16px 16px 16px !important;
+    bottom: 16px !important;
+    right: 16px !important;
+    left: 16px !important;
+    max-width: calc(100vw - 32px) !important;
+    align-items: stretch !important;
+  }
+
+  div.swal2-popup.swal2-toast,
+  .aether-swal-toast {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}

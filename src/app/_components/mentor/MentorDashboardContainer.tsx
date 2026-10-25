@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback, useTransition } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import { MentorContextBar } from "./MentorContextBar";
 import { MentorMetricCards } from "./MentorMetricCards";
 import {
@@ -12,132 +13,94 @@ import {
 import { SubmissionTable } from "./SubmissionTable";
 import { MentorSubmissionItem } from "./SubmissionTableRow";
 import { RejectionModal } from "./RejectionModal";
+import { RawBackendSubmission } from "@/types/submission";
+import { mapRawToMentorSubmission } from "./mentor-submission-mapper";
+import { getAllSubmissions } from "@/app/_actions/mentor/getAllSubmissions";
+import { updateSubmissionStatus } from "@/app/_actions/mentor/updateSubmissionStatus";
+import { showSuccessAlert, showErrorAlert } from "@/lib/alert";
 
-const INITIAL_MENTOR_SUBMISSIONS: MentorSubmissionItem[] = [
-  {
-    id: "sub-101",
-    title: "AetherGrid: Quantum-Resistant DHT Protocol",
-    track: "Distributed Systems",
-    studentName: "Elena Vance",
-    studentNode: "MIT Node #4429",
-    repoUrl: "https://github.com/aether-nodes/aethergrid-quantum-dht",
-    repoBranch: "main:8f3a9d",
-    demoUrl: "https://aethergrid.dev",
-    deploymentStatus: "Live",
-    submittedTime: "24 mins ago",
-    status: "pending",
-    merkleHash: "0x7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-  },
-  {
-    id: "sub-102",
-    title: "zk-Rollup Identity Protocol for Credentials",
-    track: "Post-Quantum Cryptography",
-    studentName: "Marcus Chen",
-    studentNode: "Stanford Node #1024",
-    repoUrl: "https://github.com/aether-nodes/zk-academic-identity",
-    repoBranch: "v2.0-prod",
-    demoUrl: "https://zk-id.stanford.edu",
-    deploymentStatus: "Live",
-    submittedTime: "1 hour ago",
-    status: "approved",
-    score: 96,
-    merkleHash: "0x4a1b89ef5532d184a3c10928beef30198aa723554109bdac832948192a34892c",
-  },
-  {
-    id: "sub-103",
-    title: "NeuralMesh: Decentralized LLM Parameter Sharding",
-    track: "AI/ML Governance",
-    studentName: "Priya Patel",
-    studentNode: "Oxford Node #8812",
-    repoUrl: "https://github.com/aether-nodes/neuralmesh-sharding",
-    repoBranch: "dev:c44b91",
-    demoUrl: "https://neuralmesh.ox.ac.uk",
-    deploymentStatus: "Staging",
-    submittedTime: "3 hours ago",
-    status: "pending",
-    merkleHash: "0x9e2c451a88bb33ef9200aa563bca2801908234ea7781bcf09941a823b49911e0",
-  },
-  {
-    id: "sub-104",
-    title: "LatticeVault: Homomorphic Encrypted Storage",
-    track: "Post-Quantum Cryptography",
-    studentName: "David Kim",
-    studentNode: "Caltech Node #3391",
-    repoUrl: "https://github.com/aether-nodes/lattice-vault",
-    repoBranch: "main:11ba90",
-    deploymentStatus: "Offline",
-    submittedTime: "5 hours ago",
-    status: "rejected",
-    merkleHash: "0x3c71a9f022bd189a55c2810938472910fa8329402948271039840293849182aa",
-  },
-  {
-    id: "sub-105",
-    title: "Byzantine Fault Tolerant Oracle Engine",
-    track: "Distributed Systems",
-    studentName: "Liam O'Connor",
-    studentNode: "ETH Zurich Node #5120",
-    repoUrl: "https://github.com/aether-nodes/bft-oracle",
-    repoBranch: "main:08ec22",
-    demoUrl: "https://oracle.ethz.ch",
-    deploymentStatus: "Live",
-    submittedTime: "8 hours ago",
-    status: "approved",
-    score: 91,
-    merkleHash: "0x88f1dc3400a129ef993881023948572019482019482938402948293840293841",
-  },
-  {
-    id: "sub-106",
-    title: "HyperSpectral Vision Transformer",
-    track: "AI/ML Governance",
-    studentName: "Sofia Rossi",
-    studentNode: "Cambridge Node #7741",
-    repoUrl: "https://github.com/aether-nodes/sat-vit",
-    repoBranch: "release:2.1",
-    demoUrl: "https://satvit.cam.ac.uk",
-    deploymentStatus: "Live",
-    submittedTime: "12 hours ago",
-    status: "pending",
-    merkleHash: "0x55d08e1a66ff0192837492817293840192840192840192830192840192840192",
-  },
-];
+interface MentorDashboardContainerProps {
+  initialSubmissions?: RawBackendSubmission[];
+  initialError?: string | null;
+}
 
-export function MentorDashboardContainer() {
-  const [submissions, setSubmissions] = useState<MentorSubmissionItem[]>(
-    INITIAL_MENTOR_SUBMISSIONS
+export function MentorDashboardContainer({
+  initialSubmissions = [],
+  initialError = null,
+}: MentorDashboardContainerProps) {
+  const [submissions, setSubmissions] = useState<MentorSubmissionItem[]>(() =>
+    initialSubmissions.map(mapRawToMentorSubmission)
   );
+  const [errorMessage, setErrorMessage] = useState<string | null>(initialError);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<MentorFilterStatus>("all");
   const [trackFilter, setTrackFilter] = useState<TrackOption>("All Tracks");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [rejectionTarget, setRejectionTarget] =
     useState<MentorSubmissionItem | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  const showNotification = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3800);
-  };
+  const handleRefresh = useCallback(() => {
+    startTransition(async () => {
+      const result = await getAllSubmissions();
+      if (result.success) {
+        setSubmissions(result.data.map(mapRawToMentorSubmission));
+        setErrorMessage(null);
+      } else {
+        setErrorMessage(result.message);
+      }
+    });
+  }, []);
+
+  // Sync state when initialSubmissions prop updates
+  useEffect(() => {
+    if (initialSubmissions) {
+      setSubmissions(initialSubmissions.map(mapRawToMentorSubmission));
+    }
+    if (initialError !== undefined) {
+      setErrorMessage(initialError);
+    }
+  }, [initialSubmissions, initialError]);
+
+  // Seamless auto-sync on mount and when returning to the window (eliminates hard reload requirement)
+  useEffect(() => {
+    let isMounted = true;
+    async function syncLatest() {
+      const result = await getAllSubmissions();
+      if (isMounted && result.success) {
+        setSubmissions(result.data.map(mapRawToMentorSubmission));
+        setErrorMessage(null);
+      }
+    }
+    syncLatest();
+
+    const handleFocus = () => {
+      syncLatest();
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      isMounted = false;
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
 
   // Filter logic
   const filteredSubmissions = submissions.filter((item) => {
-    // Search query matches title, student, node, or hash
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery.toLowerCase().trim();
     const matchesSearch =
+      query === "" ||
       item.title.toLowerCase().includes(query) ||
       item.studentName.toLowerCase().includes(query) ||
       item.studentNode.toLowerCase().includes(query) ||
-      item.merkleHash.toLowerCase().includes(query);
+      item.merkleHash.toLowerCase().includes(query) ||
+      item.id.toLowerCase().includes(query);
 
     if (!matchesSearch) return false;
 
-    // Track filter
     if (trackFilter !== "All Tracks" && item.track !== trackFilter) {
       return false;
     }
 
-    // Status filter
     if (statusFilter !== "all" && item.status !== statusFilter) {
       return false;
     }
@@ -153,28 +116,83 @@ export function MentorDashboardContainer() {
     rejected: submissions.filter((s) => s.status === "rejected").length,
   };
 
-  // Quick Approve Handler
-  const handleApprove = (id: string) => {
-    setSubmissions((prev) =>
-      prev.map((sub) =>
-        sub.id === id ? { ...sub, status: "approved", score: 94 } : sub
-      )
-    );
-    showNotification("Project approved and signed with Mentor Node #0881 consensus.");
+  // Quick Approve Handler hitting real status update endpoint
+  const handleApprove = async (id: string) => {
+    const result = await updateSubmissionStatus({
+      submissionId: id,
+      status: "APPROVED",
+      reviewComment: "Verified consensus score: 94/100. All peer criteria met.",
+    });
+
+    if (result.success) {
+      setSubmissions((prev) =>
+        prev.map((sub) =>
+          sub.id === id ? { ...sub, status: "approved", score: 94 } : sub
+        )
+      );
+      showSuccessAlert(
+        "Submission Approved",
+        result.message || "Project approved and signed with Mentor Node consensus."
+      );
+    } else {
+      showErrorAlert(
+        "Approval Failed",
+        result.message || "Failed to update submission status on evaluation network."
+      );
+    }
   };
 
-  // Rejection confirmation handler
-  const handleConfirmRejection = (id: string, reason: string, vectors: string[]) => {
-    setSubmissions((prev) =>
-      prev.map((sub) =>
-        sub.id === id ? { ...sub, status: "rejected" } : sub
-      )
-    );
-    showNotification(`Rejection feedback recorded for submission. ${vectors.length} failure vectors logged.`);
+  // Rejection confirmation handler hitting real status update endpoint
+  const handleConfirmRejection = async (
+    id: string,
+    reason: string,
+    vectors: string[]
+  ) => {
+    const combinedComment = vectors.length > 0
+      ? `Failure vectors: ${vectors.join(", ")}. ${reason}`.trim()
+      : reason;
+
+    const result = await updateSubmissionStatus({
+      submissionId: id,
+      status: "REJECTED",
+      rejectionReason: reason || "Peer review criteria not satisfied.",
+      reviewComment: combinedComment,
+    });
+
+    if (result.success) {
+      setSubmissions((prev) =>
+        prev.map((sub) =>
+          sub.id === id ? { ...sub, status: "rejected" } : sub
+        )
+      );
+      showSuccessAlert(
+        "Submission Rejected",
+        result.message || `Rejection recorded for submission. ${vectors.length} failure vectors logged.`
+      );
+    } else {
+      showErrorAlert(
+        "Rejection Failed",
+        result.message || "Failed to record rejection on evaluation network."
+      );
+    }
   };
 
-  // Batch approve
-  const handleBatchApprove = () => {
+  // Batch approve hitting real status update endpoint
+  const handleBatchApprove = async () => {
+    if (selectedIds.length === 0) return;
+
+    let successCount = 0;
+    for (const id of selectedIds) {
+      const res = await updateSubmissionStatus({
+        submissionId: id,
+        status: "APPROVED",
+        reviewComment: "Batch verified via Mentor Oracle.",
+      });
+      if (res.success) {
+        successCount++;
+      }
+    }
+
     setSubmissions((prev) =>
       prev.map((sub) =>
         selectedIds.includes(sub.id)
@@ -182,9 +200,17 @@ export function MentorDashboardContainer() {
           : sub
       )
     );
-    const count = selectedIds.length;
+
     setSelectedIds([]);
-    showNotification(`Batch approved ${count} submissions successfully.`);
+
+    if (successCount > 0) {
+      showSuccessAlert(
+        "Batch Update Completed",
+        `Successfully approved ${successCount} submissions on the evaluation ledger.`
+      );
+    } else {
+      showErrorAlert("Batch Approval Failed", "Unable to approve selected submissions.");
+    }
   };
 
   const handleToggleSelectAll = (checked: boolean) => {
@@ -201,6 +227,13 @@ export function MentorDashboardContainer() {
     );
   };
 
+  const isAuthError =
+    errorMessage &&
+    (errorMessage.toLowerCase().includes("not logged in") ||
+      errorMessage.toLowerCase().includes("credentials") ||
+      errorMessage.toLowerCase().includes("forbidden") ||
+      errorMessage.toLowerCase().includes("permission"));
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -208,30 +241,53 @@ export function MentorDashboardContainer() {
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       className="max-w-7xl mx-auto w-full space-y-6 pt-1 pb-16"
     >
-      {/* Dynamic Toast Feedback Pill */}
-      <AnimatePresence>
-        {toastMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="fixed top-6 right-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-slate-900/90 text-white border border-primary/40 shadow-[0_8px_32px_rgba(124,58,237,0.35)] backdrop-blur-xl"
-          >
-            <span className="material-symbols-outlined text-primary text-[20px]">
-              task_alt
-            </span>
-            <span className="text-xs font-headline font-medium">
-              {toastMessage}
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Top Context & Search Bar */}
       <MentorContextBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
+
+      {/* Auth or Forbidden Warning Banner */}
+      {isAuthError && (
+        <div className="rounded-3xl bg-amber-500/10 border border-amber-500/25 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-200 backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-2xl text-amber-400 shrink-0">
+              verified_user
+            </span>
+            <div>
+              <h4 className="font-headline font-semibold text-sm text-white">
+                Mentor Node Authentication Required
+              </h4>
+              <p className="font-body text-xs text-amber-200/80 mt-0.5">
+                {errorMessage}
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/login"
+            className="px-4 py-2 rounded-xl bg-amber-500 text-black font-headline text-xs font-semibold hover:bg-amber-400 transition-all shrink-0 self-start sm:self-auto text-center"
+          >
+            Sign In with Mentor Node
+          </Link>
+        </div>
+      )}
+
+      {/* Generic Error Warning Banner */}
+      {!isAuthError && errorMessage && (
+        <div className="rounded-3xl bg-rose-500/10 border border-rose-500/25 p-4 flex items-center justify-between gap-3 text-rose-200 text-xs backdrop-blur-xl">
+          <div className="flex items-center gap-2.5">
+            <span className="material-symbols-outlined text-lg text-rose-400">error</span>
+            <span>{errorMessage}</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            className="underline hover:text-white cursor-pointer"
+          >
+            Retry Sync
+          </button>
+        </div>
+      )}
 
       {/* 4 KPI Metric Cards */}
       <MentorMetricCards
@@ -253,14 +309,57 @@ export function MentorDashboardContainer() {
       />
 
       {/* Submissions Glass Table */}
-      <SubmissionTable
-        items={filteredSubmissions}
-        selectedIds={selectedIds}
-        onToggleSelectAll={handleToggleSelectAll}
-        onToggleSelectOne={handleToggleSelectOne}
-        onApprove={handleApprove}
-        onRejectClick={(item) => setRejectionTarget(item)}
-      />
+      {filteredSubmissions.length > 0 ? (
+        <SubmissionTable
+          items={filteredSubmissions}
+          selectedIds={selectedIds}
+          onToggleSelectAll={handleToggleSelectAll}
+          onToggleSelectOne={handleToggleSelectOne}
+          onApprove={handleApprove}
+          onRejectClick={(item) => setRejectionTarget(item)}
+        />
+      ) : submissions.length === 0 ? (
+        <div className="p-12 text-center rounded-3xl bg-white/[0.03] border border-white/10 text-on-surface-variant font-body space-y-3">
+          <div className="w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 text-primary mx-auto flex items-center justify-center">
+            <span className="material-symbols-outlined text-2xl">inbox</span>
+          </div>
+          <h3 className="font-headline font-semibold text-white text-base">
+            No Submissions Found in Evaluation Queue
+          </h3>
+          <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
+            Student submissions submitted to the evaluation network will appear here for peer review and consensus attestation.
+          </p>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isPending}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-white text-xs font-headline cursor-pointer transition-all"
+          >
+            <span className={`material-symbols-outlined text-base ${isPending ? "animate-spin" : ""}`}>
+              refresh
+            </span>
+            <span>Refresh Submissions</span>
+          </button>
+        </div>
+      ) : (
+        <div className="p-8 text-center rounded-3xl bg-white/[0.03] border border-white/10 text-on-surface-variant font-body text-xs space-y-2">
+          <span className="material-symbols-outlined text-xl text-outline block">
+            filter_alt_off
+          </span>
+          <div>No submissions match the selected status or track filter.</div>
+          <button
+            type="button"
+            onClick={() => {
+              setStatusFilter("all");
+              setTrackFilter("All Tracks");
+              setSearchQuery("");
+            }}
+            className="text-primary underline hover:text-primary-fixed cursor-pointer"
+          >
+            Clear Filters
+          </button>
+        </div>
+      )}
 
       {/* Rejection Feedback Modal */}
       <RejectionModal

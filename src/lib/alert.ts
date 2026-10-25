@@ -1,44 +1,47 @@
 import Swal, { SweetAlertOptions, SweetAlertPosition } from "sweetalert2";
 
-// Configure default sweetalert toast positioned at the bottom left
-export const BottomLeftAlert = Swal.mixin({
+// Configure refined SweetAlert2 toast positioned strictly at the bottom-right
+export const AppAlert = Swal.mixin({
   toast: true,
-  position: "bottom-start" as SweetAlertPosition,
+  position: "bottom-end" as SweetAlertPosition,
   showConfirmButton: false,
+  showCloseButton: true,
   timer: 4500,
   timerProgressBar: true,
-  background: "#151121",
+  grow: false,
+  width: "auto",
+  backdrop: false,
+  background: "transparent",
   color: "#ffffff",
-  iconColor: "#d2bbff",
-  showClass: {
-    popup: "swal2-show animate-in fade-in slide-in-from-bottom-4 duration-300",
-  },
-  hideClass: {
-    popup: "swal2-hide animate-out fade-out slide-out-to-bottom-4 duration-200",
+  customClass: {
+    popup: "aether-swal-toast",
+    title: "aether-swal-title",
+    htmlContainer: "aether-swal-desc",
+    icon: "aether-swal-icon",
+    timerProgressBar: "aether-swal-progress",
+    closeButton: "aether-swal-close",
   },
   didOpen: (toast) => {
     toast.addEventListener("mouseenter", Swal.stopTimer);
     toast.addEventListener("mouseleave", Swal.resumeTimer);
   },
-  customClass: {
-    popup:
-      "!bg-[#151121]/95 !backdrop-blur-2xl !border !border-purple-500/35 !rounded-2xl !p-4 !shadow-[0_16px_40px_rgba(124,58,237,0.35)] !m-5 !gap-3 !z-[9999]",
-    title: "!text-white !text-sm !font-semibold !font-headline !m-0 !tracking-tight",
-    htmlContainer: "!text-purple-200/90 !text-xs !font-body !mt-1 !leading-relaxed",
-    timerProgressBar: "!bg-gradient-to-r !from-purple-500 !to-indigo-500",
-  },
 });
 
+// Backward compatibility aliases
+export const BottomLeftAlert = AppAlert;
+export const BottomRightAlert = AppAlert;
+
 export const showAlert = (options: SweetAlertOptions) => {
-  return BottomLeftAlert.fire({
-    position: "bottom-start",
+  return AppAlert.fire({
+    position: "bottom-end",
     ...options,
   });
 };
 
 export const showSuccessAlert = (title: string, text?: string) => {
-  return BottomLeftAlert.fire({
+  return AppAlert.fire({
     icon: "success",
+    iconHtml: '<span class="material-symbols-outlined !text-[20px] text-emerald-400">check_circle</span>',
     title,
     text,
     iconColor: "#34d399",
@@ -46,17 +49,19 @@ export const showSuccessAlert = (title: string, text?: string) => {
 };
 
 export const showErrorAlert = (title: string, text?: string) => {
-  return BottomLeftAlert.fire({
+  return AppAlert.fire({
     icon: "error",
+    iconHtml: '<span class="material-symbols-outlined !text-[20px] text-rose-400">cancel</span>',
     title,
     text,
-    iconColor: "#f87171",
+    iconColor: "#f43f5e",
   });
 };
 
 export const showWarningAlert = (title: string, text?: string) => {
-  return BottomLeftAlert.fire({
+  return AppAlert.fire({
     icon: "warning",
+    iconHtml: '<span class="material-symbols-outlined !text-[20px] text-amber-400">warning</span>',
     title,
     text,
     iconColor: "#fbbf24",
@@ -64,12 +69,13 @@ export const showWarningAlert = (title: string, text?: string) => {
 };
 
 export const showInfoAlert = (title: string, text?: string) => {
-  return BottomLeftAlert.fire({
+  return AppAlert.fire({
     icon: "info",
+    iconHtml: '<span class="material-symbols-outlined !text-[20px] text-sky-400">info</span>',
     title,
     text,
-    iconColor: "#7bd0ff",
+    iconColor: "#38bdf8",
   });
 };
 
-export default BottomLeftAlert;
+export default AppAlert;
