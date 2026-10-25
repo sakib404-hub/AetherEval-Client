@@ -1,26 +1,26 @@
-import { GlassCard } from "../_components/ui/GlassCard";
-import { StatusBadge } from "../_components/ui/StatusBadge";
+import type { Metadata } from "next";
+import { HowItWorksHero } from "../_components/how-it-works/HowItWorksHero";
+import { TimeFlowTracker } from "../_components/how-it-works/TimeFlowTracker";
+import { TimelineFlowCards } from "../_components/how-it-works/TimelineFlowCards";
+import { EvaluationCriteriaMatrix } from "../_components/how-it-works/EvaluationCriteriaMatrix";
+import { TurnaroundBenchmarkCard } from "../_components/how-it-works/TurnaroundBenchmarkCard";
+import { HowItWorksCTA } from "../_components/how-it-works/HowItWorksCTA";
+
+export const metadata: Metadata = {
+  title: "AetherEval — How It Works: The Evaluation Lifecycle Timeline",
+  description:
+    "Explore the chronological lifecycle of academic project evaluation—from onboarding and submission to double-blind mentor reviews and constructive verdicts.",
+};
 
 export default function HowItWorksPage() {
   return (
-    <main className="max-w-4xl mx-auto w-full pt-12">
-      <GlassCard level={1} className="p-8 text-left space-y-4">
-        <div className="flex items-center justify-between">
-          <StatusBadge variant="info" label="Route: /how-it-works" icon="schema" />
-          <span className="text-body-xs font-headline text-on-surface-variant">
-            AetherEval Protocol
-          </span>
-        </div>
-
-        <h1 className="font-headline text-3xl md:text-4xl font-bold text-white tracking-tight">
-          How It Works
-        </h1>
-
-        <p className="font-body text-body-md text-on-surface-variant leading-relaxed">
-          This is the dedicated How It Works page. Ready for layout and workflow
-          components when you specify the design.
-        </p>
-      </GlassCard>
+    <main className="flex flex-col items-center w-full">
+      <HowItWorksHero />
+      <TimeFlowTracker />
+      <TimelineFlowCards />
+      <EvaluationCriteriaMatrix />
+      <TurnaroundBenchmarkCard />
+      <HowItWorksCTA />
     </main>
   );
 }

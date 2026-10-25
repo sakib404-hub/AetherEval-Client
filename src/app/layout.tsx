@@ -23,6 +23,15 @@ export const metadata: Metadata = {
   title: "AetherEval — Academic Project Evaluation System",
   description:
     "Next-generation quantum-attested academic project evaluation and peer review platform.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/apple-icon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default function RootLayout({

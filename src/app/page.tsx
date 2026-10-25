@@ -1,27 +1,24 @@
-import { GlassCard } from "./_components/ui/GlassCard";
-import { StatusBadge } from "./_components/ui/StatusBadge";
+import type { Metadata } from "next";
+import { OverviewHero } from "./_components/overview/OverviewHero";
+import { OverviewMetricsMatrix } from "./_components/overview/OverviewMetricsMatrix";
+import { RoleArchitectureSection } from "./_components/overview/RoleArchitectureSection";
+import { EvaluationPillarsSection } from "./_components/overview/EvaluationPillarsSection";
+import { OverviewCTASection } from "./_components/overview/OverviewCTASection";
+
+export const metadata: Metadata = {
+  title: "AetherEval — Academic Evaluation & Peer Consensus Overview",
+  description:
+    "Standardized academic evaluation connecting student builders, vetted review mentors, and administrators in a transparent review workflow.",
+};
 
 export default function OverviewPage() {
   return (
-    <main className="max-w-4xl mx-auto w-full pt-12">
-      <GlassCard level={1} className="p-8 text-left space-y-4">
-        <div className="flex items-center justify-between">
-          <StatusBadge variant="node" label="Route: / (Overview)" icon="dashboard" />
-          <span className="text-body-xs font-headline text-on-surface-variant">
-            AetherEval Network
-          </span>
-        </div>
-
-        <h1 className="font-headline text-3xl md:text-4xl font-bold text-white tracking-tight">
-          Overview
-        </h1>
-
-        <p className="font-body text-body-md text-on-surface-variant leading-relaxed">
-          Welcome to the Overview route. Use the sidebar to navigate to{" "}
-          <strong className="text-white">How It Works</strong> and{" "}
-          <strong className="text-white">Login / Register</strong>.
-        </p>
-      </GlassCard>
+    <main className="flex flex-col items-center w-full">
+      <OverviewHero />
+      <OverviewMetricsMatrix />
+      <RoleArchitectureSection />
+      <EvaluationPillarsSection />
+      <OverviewCTASection />
     </main>
   );
 }
