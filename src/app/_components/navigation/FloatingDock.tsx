@@ -29,7 +29,8 @@ const MENTOR_DASHBOARD_NAV_ITEMS: NavItem[] = [
 ];
 
 const ADMIN_DASHBOARD_NAV_ITEMS: NavItem[] = [
-  { id: "mentors", label: "Mentors", href: "/admin-dashboard", icon: "how_to_reg" },
+  { id: "overview", label: "Overview", href: "/admin-dashboard", icon: "dashboard" },
+  { id: "mentors", label: "Mentors", href: "/admin-dashboard/mentors", icon: "how_to_reg" },
 ];
 
 interface FloatingDockProps {

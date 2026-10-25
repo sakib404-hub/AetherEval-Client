@@ -163,11 +163,17 @@ export function AdminDashboardContainer({
   // Calculate real counts combining stats endpoint and active applicants
   const counts = {
     pending:
-      stats?.pendingMentors ?? applicants.filter((a) => a.status === "pending").length,
+      stats?.users?.mentors?.pendingApproval ??
+      stats?.pendingMentors ??
+      applicants.filter((a) => a.status === "pending").length,
     active:
-      stats?.activeMentors ?? applicants.filter((a) => a.status === "approved").length,
+      stats?.users?.mentors?.active ??
+      stats?.activeMentors ??
+      applicants.filter((a) => a.status === "approved").length,
     rejected:
-      stats?.rejectedMentors ?? applicants.filter((a) => a.status === "rejected").length,
+      stats?.users?.mentors?.rejected ??
+      stats?.rejectedMentors ??
+      applicants.filter((a) => a.status === "rejected").length,
   };
 
   const totalEvaluated = counts.active + counts.rejected;
@@ -182,7 +188,7 @@ export function AdminDashboardContainer({
     const target = applicants.find((a) => a.id === id);
     const result = await updateMentorStatus({
       mentorId: id,
-      status: "APPROVED",
+      status: "ACTIVE",
     });
 
     if (result.success) {
@@ -242,7 +248,7 @@ export function AdminDashboardContainer({
     for (const id of selectedIds) {
       const res = await updateMentorStatus({
         mentorId: id,
-        status: "APPROVED",
+        status: "ACTIVE",
       });
       if (res.success) {
         successCount++;

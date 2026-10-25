@@ -12,7 +12,36 @@ export interface RawBackendMentor {
   updatedAt: string;
 }
 
+export interface BackendAdminStatsUsersStudents {
+  total: number;
+  active: number;
+}
+
+export interface BackendAdminStatsUsersMentors {
+  total: number;
+  active: number;
+  pendingApproval: number;
+  rejected: number;
+  blocked?: number;
+}
+
+export interface BackendAdminStatsUsers {
+  total: number;
+  students: BackendAdminStatsUsersStudents;
+  mentors: BackendAdminStatsUsersMentors;
+}
+
+export interface BackendAdminStatsSubmissions {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+}
+
 export interface AdminStatsData {
+  users?: BackendAdminStatsUsers;
+  submissions?: BackendAdminStatsSubmissions;
+  // Backward compatibility flat properties
   totalMentors?: number;
   pendingMentors?: number;
   activeMentors?: number;

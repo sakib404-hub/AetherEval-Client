@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { logout } from "@/app/_actions/auth/logout";
 import { showSuccessAlert } from "@/lib/alert";
 
@@ -21,10 +22,17 @@ export function AdminContextBar({
   return (
     <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-8 border-b border-white/10">
       <div>
-        <div className="flex items-center gap-3 mb-2 flex-wrap">
-          <span className="px-3 py-1 rounded-full text-[10px] font-headline uppercase font-bold tracking-wider bg-primary-container/30 border border-primary/40 text-primary flex items-center gap-1.5 shadow-[0_0_12px_rgba(124,58,237,0.3)]">
+        <div className="flex items-center gap-2.5 mb-2 flex-wrap">
+          <Link
+            href="/admin-dashboard"
+            className="inline-flex items-center gap-1 text-xs font-headline font-semibold text-primary hover:text-white transition-colors bg-primary-container/15 border border-primary/30 px-2.5 py-0.5 rounded-full"
+          >
+            <span className="material-symbols-outlined text-[14px]">arrow_back</span>
+            Overview
+          </Link>
+          <span className="px-3 py-0.5 rounded-full text-[10px] font-headline uppercase font-bold tracking-wider bg-primary-container/30 border border-primary/40 text-primary flex items-center gap-1.5 shadow-[0_0_12px_rgba(124,58,237,0.3)]">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-            Admin Oracle
+            Mentor Queue
           </span>
           <span className="text-on-surface-variant text-xs font-headline">
             • Access Tier Level 4

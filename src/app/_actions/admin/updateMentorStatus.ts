@@ -37,7 +37,10 @@ export async function updateMentorStatus(
       };
     }
 
-    const normalizedStatus = payload.status.toUpperCase();
+    let normalizedStatus = payload.status.toUpperCase();
+    if (normalizedStatus === "APPROVED") {
+      normalizedStatus = "ACTIVE";
+    }
 
     const requestBody: Record<string, string> = {
       status: normalizedStatus,
@@ -64,7 +67,9 @@ export async function updateMentorStatus(
 
     if (result.success) {
       revalidatePath("/admin-dashboard");
+      revalidatePath("/admin-dashboard/mentors");
       revalidatePath("/(dashboard)/admin-dashboard", "page");
+      revalidatePath("/(dashboard)/admin-dashboard/mentors", "page");
       revalidatePath("/mentor-dashboard");
       revalidatePath("/", "layout");
 
