@@ -9,11 +9,11 @@ import { StatusBadge } from "../ui/StatusBadge";
 export function OverviewCTASection() {
   return (
     <motion.section
-      initial={{ opacity: 0, y: 28, scale: 0.98 }}
+      initial={{ opacity: 0, y: 24, scale: 0.98 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full max-w-6xl mx-auto mb-12"
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full max-w-6xl mx-auto mb-16"
       aria-label="Call to Action"
     >
       <GlassCard
@@ -44,11 +44,11 @@ export function OverviewCTASection() {
                 icon="verified"
               />
             </div>
-            <h2 className="font-headline text-3xl sm:text-4xl font-bold text-white tracking-tight leading-tight mb-3">
-              Ready to Submit or Review Academic Research?
+            <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight mb-3">
+              Ready to Submit or Review Research?
             </h2>
-            <p className="font-body text-body-md text-on-surface-variant leading-relaxed">
-              Experience an unbiased, transparent academic review process. Join as a student builder or apply to our vetted faculty evaluation panel.
+            <p className="font-body text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+              Experience an unbiased, transparent academic review workflow. Join as a student builder or apply to our accredited faculty evaluation panel.
             </p>
           </div>
 
@@ -71,7 +71,7 @@ export function OverviewCTASection() {
                 icon="schedule"
                 className="w-full sm:w-auto"
               >
-                View Workflow Timeline
+                Explore Workflow
               </GlassButton>
             </Link>
           </div>

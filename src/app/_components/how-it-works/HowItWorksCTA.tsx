@@ -9,16 +9,16 @@ import { StatusBadge } from "../ui/StatusBadge";
 export function HowItWorksCTA() {
   return (
     <motion.section
-      initial={{ opacity: 0, y: 28, scale: 0.98 }}
+      initial={{ opacity: 0, y: 24, scale: 0.98 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full max-w-6xl mx-auto mb-12"
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full max-w-5xl mx-auto mb-16 px-4"
       aria-label="Get Started"
     >
       <GlassCard
         level={3}
-        className="p-8 sm:p-12 relative overflow-hidden border-white/20 bg-gradient-to-br from-white/[0.08] via-primary-container/[0.12] to-transparent shadow-[0_16px_48px_rgba(124,58,237,0.25)]"
+        className="p-8 sm:p-12 rounded-[32px] relative overflow-hidden border-white/20 bg-gradient-to-br from-white/[0.08] via-primary-container/[0.12] to-transparent shadow-[0_16px_48px_rgba(124,58,237,0.25)]"
       >
         <motion.div
           animate={{
@@ -39,15 +39,15 @@ export function HowItWorksCTA() {
             <div className="inline-flex items-center gap-2 mb-3">
               <StatusBadge
                 variant="node"
-                label="Quick Start • Ready In Minutes"
+                label="Ready in Minutes"
                 icon="bolt"
               />
             </div>
-            <h2 className="font-headline text-3xl sm:text-4xl font-bold text-white tracking-tight leading-tight mb-3">
-              Begin Your Evaluation Journey
+            <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight mb-2.5">
+              Ready to Dispatch Your Project?
             </h2>
-            <p className="font-body text-body-md text-on-surface-variant leading-relaxed">
-              Experience clear, time-tested peer reviews without bureaucracy or unnecessary delays. Choose your role to get started immediately.
+            <p className="font-body text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+              Experience fast, double-blind evaluation with dual-artifact verification. Join as a student builder or apply to our vetted faculty panel.
             </p>
           </div>
 
@@ -59,7 +59,7 @@ export function HowItWorksCTA() {
                 icon="school"
                 className="w-full sm:w-auto shadow-[0_0_24px_rgba(124,58,237,0.45)]"
               >
-                Submit Project (Student)
+                Register as Student
               </GlassButton>
             </Link>
 

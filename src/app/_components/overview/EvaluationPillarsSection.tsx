@@ -23,7 +23,7 @@ const PILLARS: PillarItem[] = [
     badgeVariant: "node",
     icon: "code_blocks",
     description:
-      "Every submission requires both a verifiable Git repository and an active live deployment URL. Mentors inspect real codebase architecture and test production behavior side by side.",
+      "Every submission requires both a verifiable Git repository and an active deployment URL. Mentors inspect real codebase architecture and test production behavior side by side.",
     metricLabel: "Verification Standard",
     metricValue: "Repo + Live App",
   },
@@ -45,7 +45,7 @@ const PILLARS: PillarItem[] = [
     badgeVariant: "approved",
     icon: "rate_review",
     description:
-      "All evaluations deliver meaningful outcomes. Approved projects receive faculty commendations, while rejected projects receive clear, actionable remediation notes for rapid resubmission.",
+      "All evaluations deliver meaningful outcomes. Approved projects receive faculty commendations, while rejected projects receive clear remediation notes for rapid resubmission.",
     metricLabel: "Feedback Standard",
     metricValue: "100% Documented Notes",
   },
@@ -63,7 +63,7 @@ const containerVariants = {
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 28, scale: 0.96 },
+  hidden: { opacity: 0, y: 24, scale: 0.96 },
   visible: {
     opacity: 1,
     y: 0,
@@ -77,11 +77,11 @@ const cardVariants = {
 
 export function EvaluationPillarsSection() {
   return (
-    <section aria-labelledby="evaluation-pillars-heading" className="w-full max-w-6xl mx-auto mb-16">
+    <section aria-labelledby="evaluation-pillars-heading" className="w-full max-w-6xl mx-auto mb-20">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>
-          <div className="text-[11px] font-headline font-bold text-primary tracking-widest uppercase mb-1">
+          <div className="text-[11px] font-headline font-bold text-primary tracking-widest uppercase mb-1.5">
             Core Guarantees
           </div>
           <h2
@@ -91,7 +91,7 @@ export function EvaluationPillarsSection() {
             Built for Academic Integrity
           </h2>
         </div>
-        <p className="font-body text-body-sm text-on-surface-variant max-w-md">
+        <p className="font-body text-xs sm:text-sm text-on-surface-variant max-w-md">
           Strict verification protocols ensure evaluations are prompt, fair, and academically rigorous across every research track.
         </p>
       </div>
@@ -109,20 +109,19 @@ export function EvaluationPillarsSection() {
             key={pillar.id}
             variants={cardVariants}
             whileHover={{
-              y: -6,
-              scale: 1.015,
-              transition: { duration: 0.25, ease: "easeOut" },
+              y: -5,
+              transition: { duration: 0.2, ease: "easeOut" },
             }}
             className="h-full flex flex-col"
           >
             <GlassCard
               interactive
               level={2}
-              className="p-6 flex flex-col justify-between h-full group border-white/10 hover:border-primary/40 transition-all duration-300"
+              className="p-6 flex flex-col justify-between h-full group bg-white/[0.03] hover:bg-white/[0.05] border-white/10 hover:border-primary/40 transition-all duration-300"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-primary-container/20 border border-primary/30 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300 shadow-[0_0_16px_rgba(124,58,237,0.3)]">
+                  <div className="w-11 h-11 rounded-2xl bg-primary-container/20 border border-primary/30 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300 shadow-[0_0_16px_rgba(124,58,237,0.3)]">
                     <span className="material-symbols-outlined text-2xl">
                       {pillar.icon}
                     </span>
@@ -130,19 +129,19 @@ export function EvaluationPillarsSection() {
                   <StatusBadge variant={pillar.badgeVariant} label={pillar.badge} />
                 </div>
 
-                <h3 className="font-headline text-headline-sm font-semibold text-white group-hover:text-primary transition-colors mb-2.5">
+                <h3 className="font-headline text-xl font-bold text-white group-hover:text-primary transition-colors mb-2.5">
                   {pillar.title}
                 </h3>
-                <p className="font-body text-body-sm text-on-surface-variant leading-relaxed">
+                <p className="font-body text-xs sm:text-sm text-on-surface-variant leading-relaxed">
                   {pillar.description}
                 </p>
               </div>
 
               <div className="pt-4 mt-6 border-t border-white/10 flex items-center justify-between">
-                <span className="font-headline text-body-xs text-on-surface-variant">
+                <span className="font-headline text-xs text-on-surface-variant">
                   {pillar.metricLabel}
                 </span>
-                <span className="font-headline text-body-xs font-semibold text-white">
+                <span className="font-headline text-xs font-semibold text-white">
                   {pillar.metricValue}
                 </span>
               </div>

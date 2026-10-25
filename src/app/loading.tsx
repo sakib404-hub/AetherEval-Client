@@ -19,25 +19,6 @@ export default function OverviewLoading() {
           </div>
         </div>
 
-        {/* 4-Metric Grid Skeleton */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full mb-16">
-          {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="p-5 rounded-3xl bg-white/[0.04] border border-white/5 h-36 flex flex-col justify-between"
-            >
-              <div className="flex justify-between items-center">
-                <div className="w-10 h-10 rounded-xl bg-white/10" />
-                <div className="w-20 h-5 rounded-full bg-white/5" />
-              </div>
-              <div className="space-y-2">
-                <div className="w-24 h-7 rounded-lg bg-white/10" />
-                <div className="w-32 h-4 rounded bg-white/5" />
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* 3-Role Cards Skeleton */}
         <div className="w-full mb-16">
           <div className="flex justify-between items-end mb-8">

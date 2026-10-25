@@ -23,17 +23,17 @@ const ROLES: RoleCardItem[] = [
   {
     id: "student",
     role: "STUDENT",
-    title: "Project Builder Node",
+    title: "Project Builder",
     badge: "Instant Access",
     badgeVariant: "node",
     icon: "school",
     description:
-      "Submit capstone and research repositories, provide live demo URLs, and track evaluation milestones with full transparency.",
+      "Submit research and capstone repositories with verified live deployments and track milestones in real time.",
     features: [
-      "Instant student account registration",
+      "Instant account registration & profile",
       "Git repository & live deployment linking",
-      "Real-time status tracking (Pending, Approved, Rejected)",
-      "Actionable mentor critique and feedback review",
+      "Real-time status tracking (Approved, Pending, Rejected)",
+      "Actionable critique & resubmission gateway",
     ],
     ctaLabel: "Register as Student",
     ctaHref: "/register?role=student",
@@ -41,17 +41,17 @@ const ROLES: RoleCardItem[] = [
   {
     id: "mentor",
     role: "MENTOR",
-    title: "Domain Review Mentor",
+    title: "Review Mentor",
     badge: "Admin Vetted",
     badgeVariant: "info",
     icon: "supervisor_account",
     description:
-      "Evaluate student codebase architecture and live application performance along standardized rubrics with constructive guidance.",
+      "Inspect codebase architecture and live application performance along standardized rubrics with constructive guidance.",
     features: [
-      "Expertise and portfolio qualification review",
+      "Accredited domain reviewer status",
       "Double-blind peer evaluation queue",
-      "Comprehensive code & deployment inspection",
-      "Constructive approval notes or revision directives",
+      "Comprehensive codebase & deployment inspection",
+      "Binding consensus verdicts & critique feedback",
     ],
     ctaLabel: "Apply as Mentor",
     ctaHref: "/register?role=mentor",
@@ -64,12 +64,12 @@ const ROLES: RoleCardItem[] = [
     badgeVariant: "approved",
     icon: "admin_panel_settings",
     description:
-      "Audit mentor applications, maintain peer review integrity, and inspect aggregate platform analytics across departments.",
+      "Audit mentor applications, maintain evaluation integrity, and supervise platform analytics across departments.",
     features: [
-      "Review & activate pending mentor candidates",
-      "Enforce academic evaluation standards",
-      "Live submission throughput & SLA analytics",
-      "Rejection reason auditing and compliance",
+      "Review & activate mentor candidates",
+      "Sovereign review auditing & compliance",
+      "Platform throughput & SLA analytics",
+      "Root governance and consensus oversight",
     ],
     ctaLabel: "Admin Access",
     ctaHref: "/login",
@@ -81,20 +81,20 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15,
+      staggerChildren: 0.12,
       delayChildren: 0.1,
     },
   },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 32, scale: 0.96 },
+  hidden: { opacity: 0, y: 24, scale: 0.96 },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.55,
+      duration: 0.5,
       ease: [0.16, 1, 0.3, 1] as const,
     },
   },
@@ -102,11 +102,11 @@ const cardVariants = {
 
 export function RoleArchitectureSection() {
   return (
-    <section aria-labelledby="role-architecture-heading" className="w-full max-w-6xl mx-auto mb-16">
+    <section aria-labelledby="role-architecture-heading" className="w-full max-w-6xl mx-auto mb-20">
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>
-          <div className="text-[11px] font-headline font-bold text-primary tracking-widest uppercase mb-1">
+          <div className="text-[11px] font-headline font-bold text-primary tracking-widest uppercase mb-1.5">
             System Ecosystem
           </div>
           <h2
@@ -116,7 +116,7 @@ export function RoleArchitectureSection() {
             Three Specialized Platform Roles
           </h2>
         </div>
-        <p className="font-body text-body-sm text-on-surface-variant max-w-md">
+        <p className="font-body text-xs sm:text-sm text-on-surface-variant max-w-md">
           AetherEval balances builder submissions, vetted evaluator scoring, and administrative governance to preserve academic excellence.
         </p>
       </div>
@@ -134,19 +134,19 @@ export function RoleArchitectureSection() {
             key={item.id}
             variants={cardVariants}
             whileHover={{
-              y: -6,
-              transition: { duration: 0.25, ease: "easeOut" },
+              y: -5,
+              transition: { duration: 0.2, ease: "easeOut" },
             }}
             className="h-full flex flex-col"
           >
             <GlassCard
               interactive
               level={2}
-              className="p-6 flex flex-col justify-between h-full group border-white/10 hover:border-primary/40 transition-all duration-300"
+              className="p-6 flex flex-col justify-between h-full group bg-white/[0.03] hover:bg-white/[0.05] border-white/10 hover:border-primary/40 transition-all duration-300"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-primary-container/20 border border-primary/30 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300 shadow-[0_0_16px_rgba(124,58,237,0.3)]">
+                  <div className="w-11 h-11 rounded-2xl bg-primary-container/20 border border-primary/30 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300 shadow-[0_0_16px_rgba(124,58,237,0.3)]">
                     <span className="material-symbols-outlined text-2xl">
                       {item.icon}
                     </span>
@@ -157,10 +157,10 @@ export function RoleArchitectureSection() {
                 <div className="text-[10px] font-headline font-bold uppercase tracking-wider text-primary mb-1">
                   {item.role}
                 </div>
-                <h3 className="font-headline text-headline-sm font-semibold text-white group-hover:text-primary transition-colors mb-2.5">
+                <h3 className="font-headline text-xl font-bold text-white group-hover:text-primary transition-colors mb-2">
                   {item.title}
                 </h3>
-                <p className="font-body text-body-sm text-on-surface-variant leading-relaxed mb-6">
+                <p className="font-body text-xs sm:text-sm text-on-surface-variant leading-relaxed mb-5">
                   {item.description}
                 </p>
 
@@ -171,7 +171,7 @@ export function RoleArchitectureSection() {
                       <span className="material-symbols-outlined text-primary text-sm mt-0.5 shrink-0">
                         check_circle
                       </span>
-                      <span className="font-body text-body-xs text-white/80">
+                      <span className="font-body text-xs text-white/80">
                         {feature}
                       </span>
                     </div>
